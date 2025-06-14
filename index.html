@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alkneter - حجوزات السفر الحقيقية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <i class="fas fa-hotel"></i> Alkneter
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">الرئيسية</a></li>
+                <li><a href="#cars">تأجير السيارات</a></li>
+                <li><a href="#hotels">الفنادق</a></li>
+                <li><a href="#umrah">العمرة</a></li>
+                <li><a href="#contact">اتصل بنا</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Car Rental Section -->
+    <section id="cars" class="booking-section">
+        <h2><i class="fas fa-car"></i> تأجير السيارات من شركات حقيقية</h2>
+        
+        <div class="companies">
+            <!-- Enterprise -->
+            <div class="company-card" data-company="enterprise">
+                <img src="https://www.enterprise.com/content/experience-fragments/ecom/en/footer/master/_jcr_content/root/footer/logo.coreimg.svg/1593450286563/enterprise-logo.svg" alt="Enterprise">
+                <button class="select-company">اختر هذه الشركة</button>
+            </div>
+            
+            <!-- Budget -->
+            <div class="company-card" data-company="budget">
+                <img src="https://www.budget.com/content/dam/budget/images/logos/Budget-logo.svg" alt="Budget">
+                <button class="select-company">اختر هذه الشركة</button>
+            </div>
+            
+            <!-- Local Company -->
+            <div class="company-card" data-company="alkneter">
+                <img src="logo.png" alt="Alkneter Rentals">
+                <button class="select-company">اختر هذه الشركة</button>
+            </div>
+        </div>
+        
+        <!-- Car Selection (Hidden Initially) -->
+        <div class="car-selection" id="carSelection" style="display:none;">
+            <h3 id="companyTitle">السيارات المتاحة من <span></span></h3>
+            
+            <div class="cars-grid">
+                <!-- Cars will be loaded dynamically by JavaScript -->
+            </div>
+            
+            <button class="back-btn">العودة لاختيار الشركة</button>
+        </div>
+    </section>
+
+    <!-- WhatsApp Booking Widget -->
+    <div class="whatsapp-widget" id="whatsappWidget">
+        <div class="whatsapp-header">
+            <i class="fab fa-whatsapp"></i>
+            <h3>إتمام الحجز عبر واتساب</h3>
+            <span class="close-btn">&times;</span>
+        </div>
+        <div class="whatsapp-body">
+            <div class="booking-details" id="bookingDetails">
+                <!-- Filled by JavaScript -->
+            </div>
+            
+            <div class="input-group">
+                <label>رقم الهاتف (مع رمز الدولة)</label>
+                <input type="tel" id="whatsappPhone" placeholder="+9665XXXXXXXX">
+            </div>
+            <button class="whatsapp-btn" id="sendWhatsApp">إرسال طلب الحجز</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+ <link rel="stylesheet" href="style.css" />
+</body>
+</html>
