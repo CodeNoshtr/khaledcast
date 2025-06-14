@@ -1,19 +1,22 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة صيد الأسماك</title>
+    <title>مغامرة الصيد</title>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(to bottom, #1a2980, #26d0ce);
-            color: white;
-            overflow: hidden;
-            touch-action: manipulation;
+            box-sizing: border-box;
             user-select: none;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            direction: rtl;
+            background-color: #0a3d62;
         }
         
         #game-container {
@@ -23,639 +26,699 @@
             overflow: hidden;
         }
         
-        #canvas {
-            display: block;
-            background-color: #1a2980;
-        }
-        
-        #ui {
+        #background {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            background-color: rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
-        }
-        
-        #tokens {
-            font-size: 24px;
-            font-weight: bold;
-        }
-        
-        #power {
-            font-size: 20px;
-        }
-        
-        #upgrade-btn {
-            background-color: #f39c12;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        #upgrade-btn:hover {
-            background-color: #e67e22;
-        }
-        
-        #upgrade-btn:disabled {
-            background-color: #7f8c8d;
-            cursor: not-allowed;
-        }
-        
-        #start-screen, #game-over {
-            position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            background-image: url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.9;
+            z-index: 1;
+        }
+        
+        #game-area {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+        
+        .fish {
+            position: absolute;
+            transition: transform 0.1s;
+            z-index: 3;
+        }
+        
+        .fish img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .bubble {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: bubble-float 1.5s ease-out forwards;
+            z-index: 4;
+        }
+        
+        @keyframes bubble-float {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+        }
+        
+        #cannon {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 80px;
             z-index: 10;
         }
         
-        #game-over {
-            display: none;
+        #cannon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: transform 0.1s;
         }
         
-        .title {
-            font-size: 48px;
-            margin-bottom: 30px;
-            color: #f1c40f;
-            text-shadow: 2px 2px 4px #000;
-        }
-        
-        .btn {
-            background-color: #2ecc71;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-size: 20px;
-            margin: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .btn:hover {
-            background-color: #27ae60;
-            transform: scale(1.05);
-        }
-        
-        .aim {
+        #aim-pointer {
             position: absolute;
-            width: 30px;
-            height: 30px;
-            border: 2px solid red;
+            width: 20px;
+            height: 20px;
+            background-color: rgba(255, 255, 0, 0.7);
             border-radius: 50%;
+            z-index: 5;
             pointer-events: none;
             display: none;
         }
         
-        #message {
+        .bullet {
             position: absolute;
-            top: 50%;
-            left: 50%;
+            width: 10px;
+            height: 10px;
+            background-color: gold;
+            border-radius: 50%;
+            z-index: 6;
             transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            font-size: 24px;
-            display: none;
-            z-index: 20;
-            text-align: center;
         }
         
-        #bonus-message {
+        #ui {
             position: absolute;
-            top: 20%;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 18px;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+        }
+        
+        #currency {
+            margin-right: 5px;
+            font-weight: bold;
+        }
+        
+        #currency-icon {
+            margin-right: 5px;
+            font-size: 20px;
+        }
+        
+        #upgrade-panel {
+            position: absolute;
+            bottom: 120px;
             left: 50%;
             transform: translateX(-50%);
-            color: gold;
-            font-size: 28px;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px #000;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            z-index: 20;
+            text-align: center;
             display: none;
-            z-index: 15;
         }
         
+        #upgrade-btn {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        #upgrade-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        #fire-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: #e74c3c;
+            border: none;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.1s;
+        }
+        
+        #fire-btn:active {
+            transform: scale(0.95);
+        }
+        
+        #settings-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 20;
+        }
+        
+        .hit-effect {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            z-index: 7;
+            animation: hit-effect 0.3s ease-out forwards;
+        }
+        
+        @keyframes hit-effect {
+            0% {
+                transform: scale(0.5);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes fish-swim {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            25% {
+                transform: translateY(-10px) rotate(-5deg);
+            }
+            50% {
+                transform: translateY(0) rotate(0deg);
+            }
+            75% {
+                transform: translateY(10px) rotate(5deg);
+            }
+        }
+        
+        /* Responsive adjustments */
         @media (max-width: 768px) {
-            .title {
-                font-size: 36px;
+            #cannon {
+                width: 60px;
+                height: 60px;
             }
             
-            .btn {
-                padding: 12px 24px;
-                font-size: 18px;
-            }
-            
-            #tokens {
-                font-size: 20px;
-            }
-            
-            #power {
+            #fire-btn {
+                padding: 12px 20px;
                 font-size: 16px;
             }
             
-            #upgrade-btn {
-                padding: 6px 12px;
-                font-size: 14px;
+            #ui {
+                font-size: 16px;
+                padding: 8px 12px;
             }
         }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <canvas id="canvas"></canvas>
+        <div id="background"></div>
+        <div id="game-area"></div>
+        <div id="cannon"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjMDAwIiBkPSJNNDk2IDEyOEgyNTZjLTguODQgMC0xNiA3LjE2LTE2IDE2djY0SDE2Yy04Ljg0IDAtMTYgNy4xNi0xNiAxNnYxNjBjMCA4Ljg0IDcuMTYgMTYgMTYgMTZoMjI0djY0YzAgOC44NCA3LjE2IDE2IDE2IDE2aDI0MGM4Ljg0IDAgMTYtNy4xNiAxNi0xNlYxNDRjMC04Ljg0LTcuMTYtMTYtMTYtMTZ6Ii8+PC9zdmc+" alt="مدفع"></div>
+        <div id="aim-pointer"></div>
         
         <div id="ui">
-            <div id="tokens">الجواهر: 100</div>
-            <div id="power">قوة المدفع: 10</div>
-            <button id="upgrade-btn">ترقية المدفع (100)</button>
+            <span id="currency-icon">💎</span>
+            <span id="currency">10000</span>
         </div>
         
-        <div id="aim" class="aim"></div>
+        <button id="fire-btn">إطلاق</button>
+        <button id="settings-btn">⚙️</button>
         
-        <div id="start-screen">
-            <h1 class="title">لعبة صيد الأسماك</h1>
-            <button id="start-btn" class="btn">ابدأ اللعب</button>
+        <div id="upgrade-panel">
+            <h3>ترقية المدفع</h3>
+            <p>القوة الحالية: <span id="current-power">1</span></p>
+            <p>التكلفة: <span id="upgrade-cost">500</span> 💎</p>
+            <button id="upgrade-btn">ترقية</button>
         </div>
-        
-        <div id="game-over">
-            <h1 class="title">انتهت الجواهر!</h1>
-            <button id="retry-btn" class="btn">إعادة المحاولة</button>
-            <button id="ad-btn" class="btn">شاهد إعلان للحصول على 50 جوهرة</button>
-        </div>
-        
-        <div id="message">انتهت جواهرك! شاهد إعلان أو انتظر للحصول على 50 جوهرة.</div>
-        
-        <div id="bonus-message"></div>
     </div>
 
+    <audio id="shot-sound" src="data:audio/mpeg;base64,SUQzBAAAAAABEVRYVFgAAAAsAAAAATI1OTsgT0sgTEFORwAAABRudW1iZXIgb2YgY2hhbm5lbHM6IDEATVRTZAAAAAYAAAAAAABTb3VuZEZvcmdlIHZlcnNpb24gNi4wLjEwMABJU1JjAAAAJgAAAExPVE9TIFNPVU5EIEVGRkVDVCAtIFNIT1QgM0QgLSBQSVNUT0wATVRTZAAAAAYAAAAAAABTb3VuZEZvcmdlIHZlcnNpb24gNi4wLjEwMABJU1JjAAAAJgAAAExPVE9TIFNPVU5EIEVGRkVDVCAtIFNIT1QgM0QgLSBQSVNUT0wA" preload="auto"></audio>
+    <audio id="hit-sound" src="data:audio/mpeg;base64,SUQzBAAAAAABEVRYVFgAAAAsAAAAATI1OTsgT0sgTEFORwAAABRudW1iZXIgb2YgY2hhbm5lbHM6IDEATVRTZAAAAAYAAAAAAABTb3VuZEZvcmdlIHZlcnNpb24gNi4wLjEwMABJU1JjAAAAJgAAAExPVE9TIFNPVU5EIEVGRkVDVCAtIEhJVCAzRCAtIFdFQVBPThBNVFNkAAAABgAAAAAAAFNvdW5kRm9yZ2UgdmVyc2lvbiA2LjAuMTAwAElTUmMAAAAmAAAATElHSFQgU1BFQ0lBTCBTT1VORCAtIEhJVCAzRCAtIFdFQVBPThBNVFNkAAAABgAAAAAAAFNvdW5kRm9yZ2UgdmVyc2lvbiA2LjAuMTAwAElTUmMAAAAmAAAATElHSFQgU1BFQ0lBTCBTT1VORCAtIEhJVCAzRCAtIFdFQVBPThA=" preload="auto"></audio>
+    <audio id="bubble-sound" src="data:audio/mpeg;base64,SUQzBAAAAAABEVRYVFgAAAAsAAAAATI1OTsgT0sgTEFORwAAABRudW1iZXIgb2YgY2hhbm5lbHM6IDEATVRTZAAAAAYAAAAAAABTb3VuZEZvcmdlIHZlcnNpb24gNi4wLjEwMABJU1JjAAAAGgAAAExPVE9TIFdFQVBPTiBTT1VORCAtIEZJU0gATVRTZAAAAAYAAAAAAABTb3VuZEZvcmdlIHZlcnNpb24gNi4wLjEwMABJU1JjAAAAGgAAAExPVE9TIFdFQVBPTiBTT1VORCAtIEZJU0gA" preload="auto"></audio>
+    <audio id="bg-music" loop src="data:audio/mpeg;base64,SUQzBAAAAAABEVRYVFgAAAAsAAAAATI1OTsgT0sgTEFORwAAABRudW1iZXIgb2YgY2hhbm5lbHM6IDEATVRTZAAAAAYAAAAAAABTb3VuZEZvcmdlIHZlcnNpb24gNi4wLjEwMABJU1JjAAAAJgAAAExPVE9TIFNPVU5EIEVGRkVDVCAtIFdBUlJJT1IgLSBTV0lORwBNVFNkAAAABgAAAAAAAFNvdW5kRm9yZ2UgdmVyc2lvbiA2LjAuMTAwAElTUmMAAAAmAAAATElHSFQgU1BFQ0lBTCBTT1VORCAtIFdBUlJJT1IgLSBTV0lORxBNVFNkAAAABgAAAAAAAFNvdW5kRm9yZ2UgdmVyc2lvbiA2LjAuMTAwAElTUmMAAAAmAAAATElHSFQgU1BFQ0lBTCBTT1VORCAtIFdBUlJJT1IgLSBTV0lORxA=" preload="auto"></audio>
+
     <script>
-        // عناصر DOM
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const startScreen = document.getElementById('start-screen');
-        const gameOverScreen = document.getElementById('game-over');
-        const startBtn = document.getElementById('start-btn');
-        const retryBtn = document.getElementById('retry-btn');
-        const adBtn = document.getElementById('ad-btn');
-        const tokensDisplay = document.getElementById('tokens');
-        const powerDisplay = document.getElementById('power');
-        const upgradeBtn = document.getElementById('upgrade-btn');
-        const aim = document.getElementById('aim');
-        const message = document.getElementById('message');
-        const bonusMessage = document.getElementById('bonus-message');
-        
-        // ضبط حجم الكانفاس
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-        
-        // حالة اللعبة
-        const gameState = {
-            tokens: 100,
-            cannonPower: 10,
-            upgradeCost: 100,
-            upgradeLevel: 0,
-            isPlaying: false,
-            fishes: [],
-            bullets: [],
-            lastFishTime: 0,
-            fishInterval: 1000,
-            lastBonusTime: 0,
-            bonusDuration: 1500
-        };
-        
-        // ترقيات المدفع
-        const upgrades = [
-            { cost: 50, powerMultiplier: 1.5 },
-            { cost: 100, powerMultiplier: 2 },
-            { cost: 200, powerMultiplier: 2 },
-            { cost: 300, powerMultiplier: 1.5 },
-            { cost: 400, powerMultiplier: 2 },
-            { cost: 500, powerMultiplier: 1.5 },
-            { cost: 700, powerMultiplier: 2 },
-            { cost: 900, powerMultiplier: 2 }
-        ];
-        
-        // صور الأسماك (سيتم رسمها بدلاً من استخدام صور حقيقية)
-        const fishColors = ['#FF5252', '#FFEB3B', '#4CAF50', '#2196F3', '#9C27B0'];
-        
-        // كلاس السمكة
-        class Fish {
-            constructor() {
-                this.size = Math.random() * 30 + 20;
-                this.x = Math.random() < 0.5 ? -this.size : canvas.width + this.size;
-                this.y = Math.random() * (canvas.height - this.size);
-                this.speedX = (Math.random() * 3 + 1) * (Math.random() < 0.5 ? 1 : -1);
-                this.speedY = (Math.random() * 2 - 1) * 0.5;
-                this.color = fishColors[Math.floor(Math.random() * fishColors.length)];
-                this.hp = Math.floor(Math.random() * 7) + 3;
-                this.maxHp = this.hp;
-                this.angle = 0;
-                this.waveAmplitude = Math.random() * 10;
-                this.waveFrequency = Math.random() * 0.05;
-                this.originalY = this.y;
+        document.addEventListener('DOMContentLoaded', () => {
+            // عناصر DOM
+            const gameArea = document.getElementById('game-area');
+            const cannon = document.getElementById('cannon');
+            const aimPointer = document.getElementById('aim-pointer');
+            const fireBtn = document.getElementById('fire-btn');
+            const currencyDisplay = document.getElementById('currency');
+            const upgradePanel = document.getElementById('upgrade-panel');
+            const upgradeBtn = document.getElementById('upgrade-btn');
+            const currentPowerDisplay = document.getElementById('current-power');
+            const upgradeCostDisplay = document.getElementById('upgrade-cost');
+            const settingsBtn = document.getElementById('settings-btn');
+            
+            // عناصر الصوت
+            const shotSound = document.getElementById('shot-sound');
+            const hitSound = document.getElementById('hit-sound');
+            const bubbleSound = document.getElementById('bubble-sound');
+            const bgMusic = document.getElementById('bg-music');
+            
+            // متغيرات اللعبة
+            let currency = 10000;
+            let cannonPower = 1;
+            let shotCost = 1;
+            let upgradeCost = 500;
+            let fishList = [];
+            let bullets = [];
+            let bubbles = [];
+            let gameActive = true;
+            let aimAssist = true;
+            
+            // أنواع الأسماك (باستخدام صور SVG مضمنة)
+            const fishTypes = [
+                {
+                    name: "سمكة صغيرة",
+                    image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMTAwIj48cGF0aCBmaWxsPSIjRkY3MzMzIiBkPSJNMTgwIDUwQzE4MCAyMi40IDE1Ny42IDAgMTMwIDBTODAgMjIuNCA4MCA1MHMyMi40IDUwIDUwIDUwIDEwMC0yMi40IDEwMC01MHoiLz48cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMTUwIDUwYzAgMTEuMS04LjkgMjAtMjAgMjBTMTEwIDYxLjEgMTEwIDUwczguOS0yMCAyMC0yMCAyMCA4LjkgMjAgMjB6Ii8+PHBhdGggZmlsbD0iIzAwMCIgZD0iTTE0NSA1MGMwIDIuOC0yLjIgNS01IDVzLTUtMi4yLTUtNSAyLjItNSA1LTUgNSAyLjIgNSA1eiIvPjxwYXRoIGZpbGw9IiNGRjczMzMiIGQ9Ik0xMCA1MGg0MHYxMEgxMHoiLz48L3N2Zz4=",
+                    width: 80,
+                    height: 40,
+                    speed: 1.5,
+                    health: 7,
+                    value: 100
+                },
+                {
+                    name: "سمكة متوسطة",
+                    image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNDAgMTAwIj48cGF0aCBmaWxsPSIjRkZDNjMzIiBkPSJNMjIwIDUwQzIyMCAyMi40IDE5Ny42IDAgMTcwIDBTMTIwIDIyLjQgMTIwIDUwczIyLjQgNTAgNTAgNTAgNTAtMjIuNCA1MC01MHoiLz48cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMTkwIDUwYzAgMTEuMS04LjkgMjAtMjAgMjBzLTIwLTguOS0yMC0yMCA4LjktMjAgMjAtMjAgMjAgOC45IDIwIDIwem0tNDAgMGMwIDExLjEtOC45IDIwLTIwIDIwcy0yMC04LjktMjAtMjAgOC45LTIwIDIwLTIwIDIwIDguOSAyMCAyMHoiLz48cGF0aCBmaWxsPSIjMDAwIiBkPSJNMTg1IDUwYzAgMi44LTIuMiA1LTUgNXMtNS0yLjItNS01IDIuMi01IDUtNSA1IDIuMiA1IDV6bS00MCAwYzAgMi44LTIuMiA1LTUgNXMtNS0yLjItNS01IDIuMi01IDUtNSA1IDIuMiA1IDV6Ii8+PHBhdGggZmlsbD0iI0ZGQzYzMyIgZD0iTTEwIDUwaDQwdjEwSDEweiIvPjwvc3ZnPg==",
+                    width: 100,
+                    height: 50,
+                    speed: 1.2,
+                    health: 8,
+                    value: 300
+                },
+                {
+                    name: "سمكة كبيرة",
+                    image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMDAgMTIwIj48cGF0aCBmaWxsPSIjMzM3QUJGIiBkPSJNMjcwIDYwQzI3MCAyNi45IDI0My4xIDAgMjEwIDBTMTUwIDI2LjkgMTUwIDYwczI2LjkgNjAgNjAgNjAgNjAtMjYuOSA2MC02MHoiLz48cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMjQwIDYwYzAgMTEuMS04LjkgMjAtMjAgMjBzLTIwLTguOS0yMC0yMCA4LjktMjAgMjAtMjAgMjAgOC45IDIwIDIwem0tNDAgMGMwIDExLjEtOC45IDIwLTIwIDIwcy0yMC04LjktMjAtMjAgOC45LTIwIDIwLTIwIDIwIDguOSAyMCAyMHptLTQwIDBjMCAxMS4xLTguOSAyMC0yMCAyMHMtMjAtOC45LTIwLTIwIDguOS0yMCAyMC0yMCAyMCA4LjkgMjAgMjB6Ii8+PHBhdGggZmlsbD0iIzAwMCIgZD0iTTIzNSA2MGMwIDIuOC0yLjIgNS01IDVzLTUtMi4yLTUtNSAyLjItNSA1LTUgNSAyLjIgNSA1em0tNDAgMGMwIDIuOC0yLjIgNS01IDVzLTUtMi4yLTUtNSAyLjItNSA1LTUgNSAyLjIgNSA1em0tNDAgMGMwIDIuOC0yLjIgNS01IDVzLTUtMi4yLTUtNSAyLjItNSA1LTUgNSAyLjIgNSA1eiIvPjxwYXRoIGZpbGw9IiMzMzdBQkYiIGQ9Ik0xNSA2MGg0MHYxNUgxNXoiLz48L3N2Zz4=",
+                    width: 120,
+                    height: 60,
+                    speed: 0.8,
+                    health: 9,
+                    value: 700
+                },
+                {
+                    name: "سمكة نادرة",
+                    image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMDAgMTUwIj48cGF0aCBmaWxsPSIjRkYzM0ZGIiBkPSJNMjcwIDc1QzI3MCAzMy42IDIzNi40IDAgMTk1IDBTMTIwIDMzLjYgMTIwIDc1czMzLjYgNzUgNzUgNzUgNzUtMzMuNiA3NS03NXoiLz48cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMjQwIDc1YzAgMTEuMS04LjkgMjAtMjAgMjBzLTIwLTguOS0yMC0yMCA4LjktMjAgMjAtMjAgMjAgOC45IDIwIDIwem0tNDAgMGMwIDExLjEtOC45IDIwLTIwIDIwcy0yMC04LjktMjAtMjAgOC45LTIwIDIwLTIwIDIwIDguOSAyMCAyMHptLTQwIDBjMCAxMS4xLTguOSAyMC0yMCAyMHMtMjAtOC45LTIwLTIwIDguOS0yMCAyMC0yMCAyMCA4LjkgMjAgMjB6Ii8+PHBhdGggZmlsbD0iIzAwMCIgZD0iTTIzNSA3NWMwIDIuOC0yLjIgNS01IDVzLTUtMi4yLTUtNSAyLjItNSA1LTUgNSAyLjIgNSA1em0tNDAgMGMwIDIuOC0yLjIgNS01IDVzLTUtMi4yLTUtNSAyLjItNSA1LTUgNSAyLjIgNSA1em0tNDAgMGMwIDIuOC0yLjIgNS01IDVzLTUtMi4yLTUtNSAyLjItNSA1LTUgNSAyLjIgNSA1eiIvPjxwYXRoIGZpbGw9IiNGRjMzRkYiIGQ9Ik0xNSA3NWg0MHYyMEgxNXoiLz48cGF0aCBmaWxsPSIjRkY5OTAwIiBkPSJNMTUwIDQwYzAgMTEuMS04LjkgMjAtMjAgMjBzLTIwLTguOS0yMC0yMCA4LjktMjAgMjAtMjAgMjAgOC45IDIwIDIwem0tNDAgMGMwIDExLjEtOC45IDIwLTIwIDIwcy0yMC04LjktMjAtMjAgOC45LTIwIDIwLTIwIDIwIDguOSAyMCAyMHptLTQwIDBjMCAxMS4xLTguOSAyMC0yMCAyMHMtMjAtOC45LTIwLTIwIDguOS0yMCAyMC0yMCAyMCA4LjkgMjAgMjB6Ii8+PC9zdmc+",
+                    width: 150,
+                    height: 75,
+                    speed: 0.5,
+                    health: 10,
+                    value: 5000
+                }
+            ];
+            
+            // تحديث واجهة المستخدم
+            function updateUI() {
+                currencyDisplay.textContent = currency.toLocaleString('ar-EG');
+                currentPowerDisplay.textContent = cannonPower;
+                upgradeCostDisplay.textContent = upgradeCost;
+                
+                // تعطيل زر الترقية إذا لم يكن هناك عملات كافية
+                upgradeBtn.disabled = currency < upgradeCost;
             }
             
-            update() {
-                this.x += this.speedX;
-                this.y = this.originalY + Math.sin(this.angle) * this.waveAmplitude;
-                this.angle += this.waveFrequency;
-                
-                // تغيير الاتجاه إذا وصلت إلى الحافة
-                if (this.x < -this.size * 2 || this.x > canvas.width + this.size * 2) {
-                    this.speedX *= -1;
+            // إنشاء فقاعات
+            function createBubbles(x, y, count) {
+                for (let i = 0; i < count; i++) {
+                    const size = Math.random() * 15 + 5;
+                    const bubble = document.createElement('div');
+                    bubble.className = 'bubble';
+                    bubble.style.width = `${size}px`;
+                    bubble.style.height = `${size}px`;
+                    bubble.style.left = `${x + Math.random() * 20 - 10}px`;
+                    bubble.style.top = `${y + Math.random() * 20 - 10}px`;
+                    gameArea.appendChild(bubble);
+                    
+                    // إزالة الفقاعة بعد انتهاء الأنيميشن
+                    setTimeout(() => {
+                        if (bubble.parentNode) {
+                            gameArea.removeChild(bubble);
+                        }
+                    }, 1500);
                 }
                 
-                if (this.y < this.size || this.y > canvas.height - this.size) {
-                    this.speedY *= -1;
+                // تشغيل صوت الفقاعات
+                bubbleSound.currentTime = 0;
+                bubbleSound.play();
+            }
+            
+            // إنشاء سمكة جديدة
+            function createFish() {
+                const type = Math.random() < 0.05 ? fishTypes[3] : // 5% سمكة نادرة
+                             Math.random() < 0.3 ? fishTypes[2] :  // 30% سمكة كبيرة
+                             Math.random() < 0.6 ? fishTypes[1] :  // 60% سمكة متوسطة
+                             fishTypes[0];                          // الباقي سمكة صغيرة
+                
+                const fish = document.createElement('div');
+                fish.className = 'fish';
+                fish.style.width = `${type.width}px`;
+                fish.style.height = `${type.height}px`;
+                
+                // تحديد اتجاه السمكة (يمين أو يسار)
+                const direction = Math.random() < 0.5 ? 1 : -1;
+                fish.dataset.direction = direction;
+                
+                // تحديد موقع البداية
+                let startX, startY;
+                if (direction === 1) { // تتحرك من اليسار إلى اليمين
+                    startX = -type.width;
+                    startY = Math.random() * (window.innerHeight - type.height);
+                } else { // تتحرك من اليمين إلى اليسار
+                    startX = window.innerWidth;
+                    startY = Math.random() * (window.innerHeight - type.height);
                 }
+                
+                fish.style.left = `${startX}px`;
+                fish.style.top = `${startY}px`;
+                
+                // قلب السمكة حسب الاتجاه
+                fish.style.transform = direction === 1 ? 'scaleX(1)' : 'scaleX(-1)';
+                
+                // إضافة صورة السمكة
+                const fishImg = document.createElement('img');
+                fishImg.src = type.image;
+                fishImg.alt = type.name;
+                fish.appendChild(fishImg);
+                
+                // إضافة السمكة إلى منطقة اللعبة
+                gameArea.appendChild(fish);
+                
+                // حفظ بيانات السمكة
+                fish.dataset.type = JSON.stringify(type);
+                fish.dataset.health = type.health;
+                fish.dataset.speed = type.speed * (Math.random() * 0.5 + 0.75); // سرعة عشوائية
+                
+                // تحريك السمكة
+                moveFish(fish);
+                
+                // إضافة السمكة إلى القائمة
+                fishList.push(fish);
+                
+                // تحريك الزعانف
+                setInterval(() => {
+                    fish.style.animation = 'fish-swim 1s infinite';
+                }, 100);
             }
             
-            draw() {
-                ctx.save();
-                ctx.translate(this.x, this.y);
+            // تحريك السمكة
+            function moveFish(fish) {
+                const type = JSON.parse(fish.dataset.type);
+                const direction = parseInt(fish.dataset.direction);
+                const speed = parseFloat(fish.dataset.speed);
                 
-                // قلب السمكة إذا كانت تتحرك لليسار
-                if (this.speedX < 0) {
-                    ctx.scale(-1, 1);
+                let x = parseFloat(fish.style.left);
+                let y = parseFloat(fish.style.top);
+                
+                // تغيير الاتجاه أحياناً
+                if (Math.random() < 0.005) {
+                    fish.dataset.direction = direction * -1;
+                    fish.style.transform = direction === 1 ? 'scaleX(-1)' : 'scaleX(1)';
                 }
                 
-                // جسم السمكة
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.ellipse(0, 0, this.size, this.size / 2, 0, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // ذيل السمكة
-                ctx.beginPath();
-                ctx.moveTo(-this.size, 0);
-                ctx.lineTo(-this.size * 1.5, -this.size / 2);
-                ctx.lineTo(-this.size * 1.5, this.size / 2);
-                ctx.closePath();
-                ctx.fill();
-                
-                // عين السمكة
-                ctx.fillStyle = 'white';
-                ctx.beginPath();
-                ctx.arc(this.size / 2, -this.size / 6, this.size / 8, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.fillStyle = 'black';
-                ctx.beginPath();
-                ctx.arc(this.size / 2, -this.size / 6, this.size / 16, 0, Math.PI * 2);
-                ctx.fill();
-                
-                ctx.restore();
-                
-                // شريط الصحة (اختياري، يمكن إزالته)
-                if (this.hp < this.maxHp) {
-                    const healthWidth = (this.hp / this.maxHp) * this.size * 2;
-                    ctx.fillStyle = 'red';
-                    ctx.fillRect(this.x - this.size, this.y - this.size - 10, this.size * 2, 5);
-                    ctx.fillStyle = 'lime';
-                    ctx.fillRect(this.x - this.size, this.y - this.size - 10, healthWidth, 5);
+                // تغيير الاتجاه العمودي أحياناً
+                if (Math.random() < 0.01) {
+                    fish.dataset.verticalDirection = Math.random() < 0.5 ? 1 : -1;
                 }
-            }
-            
-            isHit(bullet) {
-                const distance = Math.sqrt(
-                    Math.pow(bullet.x - this.x, 2) + 
-                    Math.pow(bullet.y - this.y, 2)
-                );
-                return distance < this.size;
-            }
-        }
-        
-        // كلاس الرصاصة
-        class Bullet {
-            constructor(x, y, targetX, targetY, power) {
-                this.x = x;
-                this.y = y;
-                this.radius = 5;
-                this.speed = 15;
-                this.power = power;
                 
-                // حساب اتجاه الرصاصة
-                const angle = Math.atan2(targetY - y, targetX - x);
-                this.dx = Math.cos(angle) * this.speed;
-                this.dy = Math.sin(angle) * this.speed;
-            }
-            
-            update() {
-                this.x += this.dx;
-                this.y += this.dy;
-            }
-            
-            draw() {
-                ctx.fillStyle = 'gold';
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fill();
+                const verticalDirection = fish.dataset.verticalDirection || 1;
                 
-                // تأثير لامع للرصاصة
-                ctx.fillStyle = 'white';
-                ctx.beginPath();
-                ctx.arc(this.x - 2, this.y - 2, this.radius / 2, 0, Math.PI * 2);
-                ctx.fill();
+                // تحديث الموقع
+                x += speed * direction;
+                y += (Math.random() * 0.5) * verticalDirection;
+                
+                // التأكد من بقاء السمكة في الشاشة عمودياً
+                if (y < 0) {
+                    y = 0;
+                    fish.dataset.verticalDirection = 1;
+                } else if (y > window.innerHeight - type.height) {
+                    y = window.innerHeight - type.height;
+                    fish.dataset.verticalDirection = -1;
+                }
+                
+                fish.style.left = `${x}px`;
+                fish.style.top = `${y}px`;
+                
+                // إذا خرجت السمكة من الشاشة أفقياً، إزالتها
+                if ((direction === 1 && x > window.innerWidth) || 
+                    (direction === -1 && x < -type.width)) {
+                    const index = fishList.indexOf(fish);
+                    if (index > -1) {
+                        fishList.splice(index, 1);
+                        gameArea.removeChild(fish);
+                    }
+                    return;
+                }
+                
+                // الاستمرار في الحركة
+                requestAnimationFrame(() => moveFish(fish));
             }
             
-            isOffScreen() {
-                return this.x < 0 || this.x > canvas.width || 
-                       this.y < 0 || this.y > canvas.height;
-            }
-        }
-        
-        // تحديث واجهة المستخدم
-        function updateUI() {
-            tokensDisplay.textContent = `الجواهر: ${gameState.tokens}`;
-            powerDisplay.textContent = `قوة المدفع: ${gameState.cannonPower}`;
-            
-            if (gameState.upgradeLevel < upgrades.length) {
-                upgradeBtn.textContent = `ترقية المدفع (${upgrades[gameState.upgradeLevel].cost})`;
-                upgradeBtn.disabled = gameState.tokens < upgrades[gameState.upgradeLevel].cost;
-            } else {
-                upgradeBtn.textContent = 'تمت أقصى ترقية';
-                upgradeBtn.disabled = true;
-            }
-        }
-        
-        // بدء اللعبة
-        function startGame() {
-            gameState.isPlaying = true;
-            startScreen.style.display = 'none';
-            gameOverScreen.style.display = 'none';
-            updateUI();
-            gameLoop();
-        }
-        
-        // إنهاء اللعبة
-        function endGame() {
-            gameState.isPlaying = false;
-            gameOverScreen.style.display = 'flex';
-        }
-        
-        // إعادة تعيين اللعبة
-        function resetGame() {
-            gameState.tokens = 100;
-            gameState.cannonPower = 10;
-            gameState.upgradeCost = 100;
-            gameState.upgradeLevel = 0;
-            gameState.fishes = [];
-            gameState.bullets = [];
-            updateUI();
-        }
-        
-        // ترقية المدفع
-        function upgradeCannon() {
-            if (gameState.upgradeLevel >= upgrades.length) return;
-            
-            const upgrade = upgrades[gameState.upgradeLevel];
-            
-            if (gameState.tokens >= upgrade.cost) {
-                gameState.tokens -= upgrade.cost;
-                gameState.cannonPower = Math.floor(gameState.cannonPower * upgrade.powerMultiplier);
-                gameState.upgradeLevel++;
+            // إطلاق النار
+            function fireBullet(targetX, targetY) {
+                if (currency < shotCost) {
+                    showGameOver();
+                    return;
+                }
+                
+                currency -= shotCost;
                 updateUI();
                 
-                // عرض رسالة المكافأة
-                showBonusMessage(`تمت الترقية! القوة الجديدة: ${gameState.cannonPower}`);
-            }
-        }
-        
-        // إطلاق النار
-        function shoot(targetX, targetY) {
-            if (!gameState.isPlaying || gameState.tokens < 1) {
-                if (gameState.tokens < 1) {
-                    message.style.display = 'block';
-                    setTimeout(() => {
-                        message.style.display = 'none';
-                    }, 3000);
+                // تشغيل صوت الإطلاق
+                shotSound.currentTime = 0;
+                shotSound.play();
+                
+                // إنشاء الرصاصة
+                const bullet = document.createElement('div');
+                bullet.className = 'bullet';
+                bullet.style.left = `${cannon.offsetLeft + cannon.offsetWidth / 2}px`;
+                bullet.style.top = `${cannon.offsetTop}px`;
+                gameArea.appendChild(bullet);
+                
+                // حساب اتجاه الرصاصة
+                const startX = cannon.offsetLeft + cannon.offsetWidth / 2;
+                const startY = cannon.offsetTop;
+                
+                const dx = targetX - startX;
+                const dy = targetY - startY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const speed = 15;
+                
+                const vx = (dx / distance) * speed;
+                const vy = (dy / distance) * speed;
+                
+                // تحريك الرصاصة
+                let x = startX;
+                let y = startY;
+                
+                function moveBullet() {
+                    x += vx;
+                    y += vy;
+                    
+                    bullet.style.left = `${x}px`;
+                    bullet.style.top = `${y}px`;
+                    
+                    // التحقق من اصطدام الرصاصة بالسمك
+                    checkCollision(bullet, x, y);
+                    
+                    // إذا كانت الرصاصة خارج الشاشة، إزالتها
+                    if (x < 0 || x > window.innerWidth || y < 0 || y > window.innerHeight) {
+                        gameArea.removeChild(bullet);
+                        return;
+                    }
+                    
+                    requestAnimationFrame(moveBullet);
                 }
-                return;
+                
+                moveBullet();
             }
             
-            gameState.tokens -= 1;
-            updateUI();
-            
-            // مركز المدفع (أسفل منتصف الشاشة)
-            const cannonX = canvas.width / 2;
-            const cannonY = canvas.height - 50;
-            
-            const bullet = new Bullet(cannonX, cannonY, targetX, targetY, gameState.cannonPower);
-            gameState.bullets.push(bullet);
-            
-            // تأثير صوتي (يمكن إضافته لاحقاً)
-        }
-        
-        // عرض رسالة المكافأة
-        function showBonusMessage(text) {
-            bonusMessage.textContent = text;
-            bonusMessage.style.display = 'block';
-            gameState.lastBonusTime = Date.now();
-        }
-        
-        // حلقة اللعبة الرئيسية
-        function gameLoop() {
-            if (!gameState.isPlaying) return;
-            
-            // مسح الشاشة
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // خلفية متحركة
-            drawBackground();
-            
-            // إنشاء أسماك جديدة
-            const now = Date.now();
-            if (now - gameState.lastFishTime > gameState.fishInterval) {
-                gameState.fishes.push(new Fish());
-                gameState.lastFishTime = now;
-                
-                // تقليل الفاصل الزمني مع مرور الوقت لجعل اللعبة أكثر صعوبة
-                gameState.fishInterval = Math.max(200, gameState.fishInterval * 0.99);
-            }
-            
-            // تحديث ورسم الأسماك
-            for (let i = gameState.fishes.length - 1; i >= 0; i--) {
-                const fish = gameState.fishes[i];
-                fish.update();
-                fish.draw();
-                
-                // إزالة الأسماك التي خرجت من الشاشة
-                if (fish.x < -fish.size * 3 || fish.x > canvas.width + fish.size * 3) {
-                    gameState.fishes.splice(i, 1);
-                }
-            }
-            
-            // تحديث ورسم الرصاصات
-            for (let i = gameState.bullets.length - 1; i >= 0; i--) {
-                const bullet = gameState.bullets[i];
-                bullet.update();
-                bullet.draw();
-                
-                // اكتشاف التصادم مع الأسماك
-                for (let j = gameState.fishes.length - 1; j >= 0; j--) {
-                    const fish = gameState.fishes[j];
-                    if (fish.isHit(bullet)) {
-                        fish.hp -= bullet.power;
+            // التحقق من الاصطدام
+            function checkCollision(bullet, bulletX, bulletY) {
+                for (let i = 0; i < fishList.length; i++) {
+                    const fish = fishList[i];
+                    const fishRect = fish.getBoundingClientRect();
+                    
+                    if (bulletX >= fishRect.left && bulletX <= fishRect.right &&
+                        bulletY >= fishRect.top && bulletY <= fishRect.bottom) {
                         
-                        // إزالة الرصاصة بعد الاصطدام
-                        gameState.bullets.splice(i, 1);
+                        // تأثير الإصابة
+                        createHitEffect(bulletX, bulletY);
                         
-                        // إذا ماتت السمكة
-                        if (fish.hp <= 0) {
-                            const bonus = Math.floor(Math.random() * 4901) + 100; // 100-5000
-                            gameState.tokens += bonus;
+                        // تخفيض صحة السمكة
+                        const currentHealth = parseInt(fish.dataset.health);
+                        const newHealth = currentHealth - cannonPower;
+                        fish.dataset.health = newHealth;
+                        
+                        // إذا نفدت صحة السمكة
+                        if (newHealth <= 0) {
+                            const type = JSON.parse(fish.dataset.type);
+                            const reward = type.value + Math.floor(Math.random() * type.value * 0.5);
+                            currency += reward;
                             updateUI();
-                            gameState.fishes.splice(j, 1);
-                            showBonusMessage(`+${bonus} جوهرة!`);
+                            
+                            // تأثير اختفاء السمكة
+                            createBubbles(fishRect.left + fishRect.width / 2, fishRect.top + fishRect.height / 2, 20);
+                            
+                            // إزالة السمكة
+                            gameArea.removeChild(fish);
+                            fishList.splice(i, 1);
+                        } else {
+                            // تأثير إصابة بدون موت
+                            createBubbles(fishRect.left + fishRect.width / 2, fishRect.top + fishRect.height / 2, 5);
                         }
+                        
+                        // تشغيل صوت الاصطدام
+                        hitSound.currentTime = 0;
+                        hitSound.play();
+                        
+                        // إزالة الرصاصة
+                        gameArea.removeChild(bullet);
                         
                         break;
                     }
                 }
+            }
+            
+            // تأثير الإصابة
+            function createHitEffect(x, y) {
+                const effect = document.createElement('div');
+                effect.className = 'hit-effect';
+                effect.style.left = `${x}px`;
+                effect.style.top = `${y}px`;
+                gameArea.appendChild(effect);
                 
-                // إزالة الرصاصات التي خرجت من الشاشة
-                if (bullet.isOffScreen()) {
-                    gameState.bullets.splice(i, 1);
+                setTimeout(() => {
+                    gameArea.removeChild(effect);
+                }, 300);
+            }
+            
+            // عرض نافذة نفاد العملات
+            function showGameOver() {
+                alert('نفدت العملات! يمكنك مشاهدة إعلان للحصول على المزيد أو المحاولة لاحقاً.');
+            }
+            
+            // ترقية المدفع
+            function upgradeCannon() {
+                if (currency < upgradeCost) return;
+                
+                currency -= upgradeCost;
+                cannonPower += 1;
+                shotCost = Math.floor(cannonPower * 0.8);
+                upgradeCost = Math.floor(500 * Math.pow(1.5, cannonPower));
+                
+                updateUI();
+                
+                // إخفاء لوحة الترقية بعد الترقية
+                setTimeout(() => {
+                    upgradePanel.style.display = 'none';
+                }, 1000);
+            }
+            
+            // أحداث التحكم
+            function setupControls() {
+                // تحريك مؤشر التصويب
+                document.addEventListener('mousemove', (e) => {
+                    aimPointer.style.left = `${e.clientX}px`;
+                    aimPointer.style.top = `${e.clientY}px`;
+                    aimPointer.style.display = 'block';
+                });
+                
+                // إخفاء المؤشر عند مغادرة الشاشة
+                document.addEventListener('mouseleave', () => {
+                    aimPointer.style.display = 'none';
+                });
+                
+                // إطلاق النار بالنقر
+                document.addEventListener('click', (e) => {
+                    if (e.target !== fireBtn && e.target !== upgradeBtn && e.target !== settingsBtn) {
+                        fireBullet(e.clientX, e.clientY);
+                    }
+                });
+                
+                // إطلاق النار بالزر
+                fireBtn.addEventListener('click', () => {
+                    const centerX = window.innerWidth / 2;
+                    const centerY = window.innerHeight / 2;
+                    fireBullet(centerX, centerY);
+                });
+                
+                // الترقية
+                upgradeBtn.addEventListener('click', upgradeCannon);
+                
+                // إظهار/إخفاء لوحة الترقية
+                settingsBtn.addEventListener('click', () => {
+                    upgradePanel.style.display = upgradePanel.style.display === 'none' ? 'block' : 'none';
+                });
+                
+                // التحكم باللمس
+                document.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    aimPointer.style.left = `${touch.clientX}px`;
+                    aimPointer.style.top = `${touch.clientY}px`;
+                    aimPointer.style.display = 'block';
+                });
+                
+                document.addEventListener('touchend', () => {
+                    aimPointer.style.display = 'none';
+                });
+                
+                document.addEventListener('touchstart', (e) => {
+                    const touch = e.touches[0];
+                    fireBullet(touch.clientX, touch.clientY);
+                });
+            }
+            
+            // بدء اللعبة
+            function startGame() {
+                // تشغيل الموسيقى
+                bgMusic.volume = 0.3;
+                bgMusic.play();
+                
+                // إنشاء الأسماك بشكل دوري
+                setInterval(createFish, 2000);
+                
+                // إنشاء بعض الأسماك في البداية
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(createFish, i * 500);
                 }
+                
+                // إعداد التحكم
+                setupControls();
+                
+                // تحديث واجهة المستخدم
+                updateUI();
             }
             
-            // رسم المدفع
-            drawCannon();
-            
-            // إخفاء رسالة المكافأة بعد مدة معينة
-            if (bonusMessage.style.display === 'block' && 
-                Date.now() - gameState.lastBonusTime > gameState.bonusDuration) {
-                bonusMessage.style.display = 'none';
-            }
-            
-            // التحقق من نفاد الجواهر
-            if (gameState.tokens <= 0) {
-                endGame();
-            }
-            
-            requestAnimationFrame(gameLoop);
-        }
-        
-        // رسم خلفية متحركة
-        function drawBackground() {
-            // تدرج لوني للبحر
-            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, '#1a2980');
-            gradient.addColorStop(1, '#26d0ce');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // رسم فقاعات هواء
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-            for (let i = 0; i < 20; i++) {
-                const size = Math.random() * 10 + 5;
-                const x = Math.random() * canvas.width;
-                const y = (Date.now() / 100 + i * 50) % canvas.height;
-                ctx.beginPath();
-                ctx.arc(x, y, size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-        
-        // رسم المدفع
-        function drawCannon() {
-            const cannonX = canvas.width / 2;
-            const cannonY = canvas.height - 50;
-            const cannonWidth = 60;
-            const cannonHeight = 30;
-            
-            ctx.save();
-            ctx.translate(cannonX, cannonY);
-            
-            // قاعدة المدفع
-            ctx.fillStyle = '#34495e';
-            ctx.fillRect(-cannonWidth / 2, -10, cannonWidth, 20);
-            
-            // برميل المدفع
-            ctx.fillStyle = '#7f8c8d';
-            ctx.fillRect(-10, -15, 40, 30);
-            ctx.fillStyle = '#95a5a6';
-            ctx.fillRect(30, -10, 20, 20);
-            
-            // دوار المدفع
-            ctx.fillStyle = '#2c3e50';
-            ctx.beginPath();
-            ctx.arc(0, 0, 15, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.restore();
-        }
-        
-        // أحداث التحكم
-        startBtn.addEventListener('click', () => {
+            // بدء اللعبة عند تحميل الصفحة
             startGame();
         });
-        
-        retryBtn.addEventListener('click', () => {
-            resetGame();
-            startGame();
-        });
-        
-        adBtn.addEventListener('click', () => {
-            // في الواقع، هنا سيتم تشغيل إعلان ثم منح الجوائز
-            gameState.tokens += 50;
-            updateUI();
-            gameOverScreen.style.display = 'none';
-            startGame();
-        });
-        
-        upgradeBtn.addEventListener('click', upgradeCannon);
-        
-        // أحداث الماوس/اللمس
-        canvas.addEventListener('mousemove', (e) => {
-            aim.style.display = 'block';
-            aim.style.left = (e.clientX - 15) + 'px';
-            aim.style.top = (e.clientY - 15) + 'px';
-        });
-        
-        canvas.addEventListener('mouseleave', () => {
-            aim.style.display = 'none';
-        });
-        
-        canvas.addEventListener('click', (e) => {
-            shoot(e.clientX, e.clientY);
-        });
-        
-        // أحداث اللمس للهواتف
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            aim.style.display = 'block';
-            aim.style.left = (touch.clientX - 15) + 'px';
-            aim.style.top = (touch.clientY - 15) + 'px';
-        });
-        
-        canvas.addEventListener('touchend', (e) => {
-            const touch = e.changedTouches[0];
-            shoot(touch.clientX, touch.clientY);
-        });
-        
-        // تحديث الواجهة عند البدء
-        updateUI();
     </script>
 </body>
 </html>
