@@ -1,86 +1,319 @@
+<!-- KHALED CAST - Başlangıç Dosyası (index.html) -->
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alkneter - حجوزات السفر الحقيقية</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <title>Khaled Cast - USB Kamera Yayını</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --primary-color: #00bfff;
+      --background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      --dark-bg: #1a1a1a;
+      --light-bg: #f7f7f7;
+      --text-color: #fff;
+      --light-text: #333;
+    }
+
+    * {
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--background);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    header {
+      width: 100%;
+      padding: 20px;
+      text-align: center;
+      background-color: rgba(0, 0, 0, 0.5);
+      box-shadow: 0 2px 10px rgba(0, 191, 255, 0.4);
+      border-radius: 12px;
+    }
+
+    header h1 {
+      color: var(--primary-color);
+      font-size: 2.5rem;
+      text-shadow: 1px 1px 10px #000;
+    }
+
+    nav ul {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 10px;
+      list-style: none;
+    }
+
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: background 0.3s;
+    }
+
+    nav a:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    main {
+      width: 100%;
+      max-width: 1000px;
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+    }
+
+    section {
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    section h2 {
+      font-size: 1.8rem;
+      color: var(--primary-color);
+      margin-bottom: 15px;
+    }
+
+    video {
+      width: 100%;
+      border-radius: 16px;
+      box-shadow: 0 0 30px rgba(0, 191, 255, 0.4);
+    }
+
+    .controls {
+      margin-top: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .controls button {
+      background: var(--primary-color);
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+      transition: 0.3s ease;
+    }
+
+    .controls button:hover {
+      background-color: #0099cc;
+      transform: translateY(-2px);
+    }
+
+    #videoInfo {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 14px;
+      color: #ccc;
+      text-shadow: 0 0 5px #000;
+    }
+
+    #recordingList {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    #recordingList video {
+      width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.2);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      color: #ccc;
+    }
+
+    select {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: none;
+      font-size: 14px;
+    }
+
+    footer {
+      margin-top: auto;
+      padding: 15px;
+      font-size: 13px;
+      color: #aaa;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 1.8rem;
+      }
+
+      .controls button {
+        font-size: 14px;
+        padding: 8px 14px;
+      }
+
+      section h2 {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <nav>
-            <div class="logo">
-                <i class="fas fa-hotel"></i> Alkneter
-            </div>
-            <ul class="nav-links">
-                <li><a href="#home">الرئيسية</a></li>
-                <li><a href="#cars">تأجير السيارات</a></li>
-                <li><a href="#hotels">الفنادق</a></li>
-                <li><a href="#umrah">العمرة</a></li>
-                <li><a href="#contact">اتصل بنا</a></li>
-            </ul>
-        </nav>
-    </header>
+  <header>
+    <h1>Khaled Cast 🎥</h1>
+    <nav>
+      <ul>
+        <li><a href="#viewer">Kamera</a></li>
+        <li><a href="#gallery">Kayıtlar</a></li>
+        <li><a href="#settings">Ayarlar</a></li>
+      </ul>
+    </nav>
+  </header>
 
-    <!-- Car Rental Section -->
-    <section id="cars" class="booking-section">
-        <h2><i class="fas fa-car"></i> تأجير السيارات من شركات حقيقية</h2>
-        
-        <div class="companies">
-            <!-- Enterprise -->
-            <div class="company-card" data-company="enterprise">
-                <img src="https://www.enterprise.com/content/experience-fragments/ecom/en/footer/master/_jcr_content/root/footer/logo.coreimg.svg/1593450286563/enterprise-logo.svg" alt="Enterprise">
-                <button class="select-company">اختر هذه الشركة</button>
-            </div>
-            
-            <!-- Budget -->
-            <div class="company-card" data-company="budget">
-                <img src="https://www.budget.com/content/dam/budget/images/logos/Budget-logo.svg" alt="Budget">
-                <button class="select-company">اختر هذه الشركة</button>
-            </div>
-            
-            <!-- Local Company -->
-            <div class="company-card" data-company="alkneter">
-                <img src="logo.png" alt="Alkneter Rentals">
-                <button class="select-company">اختر هذه الشركة</button>
-            </div>
-        </div>
-        
-        <!-- Car Selection (Hidden Initially) -->
-        <div class="car-selection" id="carSelection" style="display:none;">
-            <h3 id="companyTitle">السيارات المتاحة من <span></span></h3>
-            
-            <div class="cars-grid">
-                <!-- Cars will be loaded dynamically by JavaScript -->
-            </div>
-            
-            <button class="back-btn">العودة لاختيار الشركة</button>
-        </div>
+  <main>
+    <section id="viewer">
+      <video id="video" autoplay playsinline></video>
+      <div class="controls">
+        <button onclick="Camera.start()">Başlat</button>
+        <button onclick="Camera.stop()">Durdur</button>
+        <button onclick="Camera.switch()">Kamera Değiştir</button>
+        <button onclick="Recorder.start()">Kayda Başla</button>
+        <button onclick="Recorder.stop()">Kaydı İndir</button>
+      </div>
+      <div id="videoInfo">Hazır...</div>
     </section>
 
-    <!-- WhatsApp Booking Widget -->
-    <div class="whatsapp-widget" id="whatsappWidget">
-        <div class="whatsapp-header">
-            <i class="fab fa-whatsapp"></i>
-            <h3>إتمام الحجز عبر واتساب</h3>
-            <span class="close-btn">&times;</span>
-        </div>
-        <div class="whatsapp-body">
-            <div class="booking-details" id="bookingDetails">
-                <!-- Filled by JavaScript -->
-            </div>
-            
-            <div class="input-group">
-                <label>رقم الهاتف (مع رمز الدولة)</label>
-                <input type="tel" id="whatsappPhone" placeholder="+9665XXXXXXXX">
-            </div>
-            <button class="whatsapp-btn" id="sendWhatsApp">إرسال طلب الحجز</button>
-        </div>
-    </div>
+    <section id="gallery">
+      <h2>📁 Kayıt Galerisi</h2>
+      <div id="recordingList"></div>
+    </section>
 
-    <script src="script.js"></script>
- <link rel="stylesheet" href="style.css" />
+    <section id="settings">
+      <h2>⚙️ Ayarlar</h2>
+      <label>
+        Tema:
+        <select id="themeSelect" onchange="ThemeSwitcher.change(this.value)">
+          <option value="dark">Karanlık</option>
+          <option value="light">Açık</option>
+        </select>
+      </label>
+      <label>
+        Dil:
+        <select id="langSelect">
+          <option value="tr">Türkçe</option>
+          <option value="en">English</option>
+          <option value="ar">العربية</option>
+        </select>
+      </label>
+    </section>
+  </main>
+
+  <footer>
+    <p>Khaled Cast © 2025 – Powered by CodeNosh</p>
+  </footer>
+
+  <script>
+    let currentStream;
+    let mediaRecorder;
+    let recordedChunks = [];
+    let currentDeviceIndex = 0;
+    let devices = [];
+
+    const video = document.getElementById("video");
+    const videoInfo = document.getElementById("videoInfo");
+    const recordingList = document.getElementById("recordingList");
+
+    const Camera = {
+      start: async () => {
+        devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(device => device.kind === "videoinput");
+        if (!videoDevices.length) {
+          videoInfo.innerText = "Kamera bulunamadı.";
+          return;
+        }
+
+        const constraints = { video: { deviceId: videoDevices[currentDeviceIndex].deviceId } };
+        if (currentStream) {
+          currentStream.getTracks().forEach(track => track.stop());
+        }
+        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = currentStream;
+        videoInfo.innerText = "Kamera çalışıyor...";
+      },
+
+      stop: () => {
+        if (currentStream) {
+          currentStream.getTracks().forEach(track => track.stop());
+          video.srcObject = null;
+          videoInfo.innerText = "Kamera durduruldu.";
+        }
+      },
+
+      switch: async () => {
+        const videoDevices = devices.filter(device => device.kind === "videoinput");
+        if (videoDevices.length > 1) {
+          currentDeviceIndex = (currentDeviceIndex + 1) % videoDevices.length;
+          await Camera.start();
+        } else {
+          videoInfo.innerText = "İkinci kamera yok.";
+        }
+      }
+    };
+
+    const Recorder = {
+      start: () => {
+        if (!currentStream) {
+          videoInfo.innerText = "Kamera açık değil.";
+          return;
+        }
+        recordedChunks = [];
+        mediaRecorder = new MediaRecorder(currentStream);
+        mediaRecorder.ondataavailable = e => {
+          if (e.data.size > 0) recordedChunks.push(e.data);
+        };
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(recordedChunks, { type: "video/webm" });
+          const url = URL.createObjectURL(blob);
+          const recordedVideo = document.createElement("video");
+          recordedVideo.controls = true;
+          recordedVideo.src = url;
+          recordingList.appendChild(recordedVideo);
+
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "khaled-cast-kayit.webm";
+          a.click();
+        };
+        mediaRecorder.start();
+        videoInfo.innerText = "Kayıt başladı...";
+      },
+
+      stop: () => {
+        if (mediaRecorder && mediaRecorder.state !== "inactive") {
+          mediaRecorder.stop();
+          videoInfo.innerText = "Kayıt tamamlandı.";
+        }
+      }
+    };
+  </script>
 </body>
 </html>
