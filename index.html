@@ -1,724 +1,1770 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مغامرة الصيد</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ultra Balık Avı - Çok Oyunculu Mod</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
-        
         body {
             font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            height: 100vh;
+            width: 100vw;
             overflow: hidden;
-            direction: rtl;
-            background-color: #0a3d62;
+            color: white;
+            position: fixed;
         }
-        
         #game-container {
             position: relative;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
+            perspective: 1000px;
         }
-        
-        #background {
+        #water {
             position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            background-image: url('https://images.unsplash.com/photo-1505118380757-91f5f5632de0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');
-            background-size: cover;
-            background-position: center;
-            opacity: 0.9;
-            z-index: 1;
+            background: linear-gradient(to bottom, rgba(0, 105, 148, 0.8), rgba(0, 0, 100, 0.95));
+            box-shadow: inset 0 0 100px rgba(0, 0, 50, 0.8);
         }
-        
-        #game-area {
+        #bubbles {
             position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
+            pointer-events: none;
             z-index: 2;
         }
-        
-        .fish {
-            position: absolute;
-            transition: transform 0.1s;
-            z-index: 3;
-        }
-        
-        .fish img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-        
         .bubble {
             position: absolute;
-            background-color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.15);
             border-radius: 50%;
-            animation: bubble-float 1.5s ease-out forwards;
-            z-index: 4;
+            animation: bubble-up linear infinite;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
         }
-        
-        @keyframes bubble-float {
-            0% {
-                transform: translateY(0);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100px);
-                opacity: 0;
-            }
+        @keyframes bubble-up {
+            to { transform: translateY(-100vh); }
         }
-        
-        #cannon {
+        #fishes {
             position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+        }
+        .fish {
+            position: absolute;
+            transition: transform 0.2s;
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: black;
+            text-shadow: 0 0 3px white;
+            transform-style: preserve-3d;
+            will-change: transform;
+            backface-visibility: hidden;
+        }
+        .fish-value {
+            position: absolute;
+            bottom: -15px;
+            width: 100%;
+            text-align: center;
+            font-size: 10px;
+            color: gold;
+            font-weight: bold;
+            text-shadow: 0 0 2px black;
+        }
+        .player {
+            position: absolute;
             width: 80px;
             height: 80px;
             z-index: 10;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23ff9900" d="M256 0C114.6 0 0 114.6 0 256s114.6 256 256 256 256-114.6 256-256S397.4 0 256 0zm0 464c-114.7 0-208-93.3-208-208S141.3 48 256 48s208 93.3 208 208-93.3 208-208 208zm96-208c0-53-43-96-96-96s-96 43-96 96 43 96 96 96 96-43 96-96zm-96 64c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64z"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transition: transform 0.1s ease-out;
+            filter: drop-shadow(0 0 8px rgba(255, 204, 0, 0.8));
+            transform-origin: center;
         }
-        
-        #cannon img {
+        #main-player {
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .bot-player {
+            opacity: 0.7;
+        }
+        #bot1 {
+            bottom: 10px;
+            left: 20px;
+        }
+        #bot2 {
+            bottom: 10px;
+            right: 20px;
+        }
+        #bot3 {
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .cannon {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            width: 15px;
+            height: 30px;
+            background: linear-gradient(to right, #555, #777);
+            border-radius: 3px;
+            transform: translateX(-50%) rotate(0deg);
+            transform-origin: bottom center;
+            z-index: 9;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+        #projectiles {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            object-fit: contain;
-            transition: transform 0.1s;
-        }
-        
-        #aim-pointer {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: rgba(255, 255, 0, 0.7);
-            border-radius: 50%;
-            z-index: 5;
             pointer-events: none;
-            display: none;
+            z-index: 15;
         }
-        
-        .bullet {
+        .projectile {
             position: absolute;
             width: 10px;
             height: 10px;
-            background-color: gold;
+            background: radial-gradient(circle, gold 30%, orange 100%);
             border-radius: 50%;
-            z-index: 6;
-            transform: translate(-50%, -50%);
+            box-shadow: 0 0 8px yellow, 0 0 3px white;
+            transform: translateZ(10px);
+            z-index: 16;
         }
-        
-        #ui {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background-color: rgba(0, 0, 0, 0.6);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 10px;
-            font-size: 18px;
-            z-index: 20;
-            display: flex;
-            align-items: center;
+        .bot-projectile {
+            background: radial-gradient(circle, #aaa 30%, #888 100%);
+            box-shadow: 0 0 8px #ccc;
         }
-        
-        #currency {
-            margin-right: 5px;
-            font-weight: bold;
-        }
-        
-        #currency-icon {
-            margin-right: 5px;
-            font-size: 20px;
-        }
-        
-        #upgrade-panel {
-            position: absolute;
-            bottom: 120px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 10px;
-            border-radius: 10px;
-            z-index: 20;
-            text-align: center;
-            display: none;
-        }
-        
-        #upgrade-btn {
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            padding: 8px 15px;
-            margin-top: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        
-        #upgrade-btn:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        
-        #fire-btn {
+        #controls {
             position: absolute;
             bottom: 20px;
-            right: 20px;
-            background-color: #e74c3c;
-            border: none;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 50%;
-            font-size: 18px;
-            cursor: pointer;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
             z-index: 20;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            transition: transform 0.1s;
+            width: 90%;
+            max-width: 400px;
+            justify-content: center;
         }
-        
-        #fire-btn:active {
-            transform: scale(0.95);
-        }
-        
-        #settings-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background-color: rgba(0, 0, 0, 0.6);
+        button {
+            padding: 8px 16px;
+            background: linear-gradient(to bottom, #ff6600, #cc5200);
             border: none;
+            border-radius: 20px;
             color: white;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+            transition: all 0.2s;
+            font-size: 14px;
+            min-width: 70px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            flex: 1;
+        }
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);
+        }
+        button:disabled {
+            opacity: 0.6;
+            transform: none;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            cursor: not-allowed;
+            background: linear-gradient(to bottom, #666, #444);
+        }
+        #score-display, #bet-display, #multiplier-display {
+            position: absolute;
+            top: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 20;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            max-width: 90%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        #score-display { 
+            left: 10px;
+            color: gold;
+        }
+        #bet-display { 
+            right: 10px;
+            color: #00ffaa;
+        }
+        #multiplier-display {
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ff66ff;
+        }
+        .display-icon {
+            font-size: 16px;
+        }
+
+        #auto-aim-btn {
+            position: absolute;
+            bottom: 70px;
+            right: 10px;
+            background: linear-gradient(to bottom, #3399ff, #0066cc);
+            color: white;
+            border: none;
             padding: 10px;
             border-radius: 50%;
+            font-weight: bold;
             cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+            transition: all 0.2s;
             z-index: 20;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
         }
-        
+        #auto-aim-btn:active {
+            transform: scale(0.95);
+        }
+        #auto-aim-btn.active {
+            background: linear-gradient(to bottom, #ff3333, #cc0000);
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 3px 10px rgba(255, 0, 0, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 3px 15px rgba(255, 0, 0, 0.6); }
+            100% { transform: scale(1); box-shadow: 0 3px 10px rgba(255, 0, 0, 0.4); }
+        }
+
+        #game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+            display: none;
+            backdrop-filter: blur(3px);
+            padding: 20px;
+            text-align: center;
+        }
+        #game-over h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #ff5e00;
+            text-shadow: 0 0 10px rgba(255, 94, 0, 0.8);
+            animation: gameOverTitle 2s infinite;
+        }
+        @keyframes gameOverTitle {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+        #game-over-stats {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 300px;
+        }
+        #game-over-stats div {
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        #game-over-stats span:last-child {
+            color: gold;
+            font-weight: bold;
+        }
+        #game-over-stats .bot-stat {
+            color: #aaa;
+            font-size: 12px;
+        }
+
         .hit-effect {
             position: absolute;
-            width: 30px;
-            height: 30px;
-            background-color: rgba(255, 255, 255, 0.8);
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, rgba(255, 200, 0, 0.8), transparent 70%);
             border-radius: 50%;
-            z-index: 7;
-            animation: hit-effect 0.3s ease-out forwards;
+            animation: hitAnim 0.4s forwards;
+            pointer-events: none;
+            z-index: 15;
         }
-        
-        @keyframes hit-effect {
-            0% {
-                transform: scale(0.5);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(2);
-                opacity: 0;
-            }
+        @keyframes hitAnim {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(1.8); opacity: 0; }
         }
-        
-        @keyframes fish-swim {
-            0%, 100% {
-                transform: translateY(0) rotate(0deg);
-            }
-            25% {
-                transform: translateY(-10px) rotate(-5deg);
-            }
-            50% {
-                transform: translateY(0) rotate(0deg);
-            }
-            75% {
-                transform: translateY(10px) rotate(5deg);
-            }
+
+        .coin-effect {
+            position: absolute;
+            color: gold;
+            font-weight: bold;
+            font-size: 18px;
+            animation: coinAnim 1s forwards;
+            pointer-events: none;
+            z-index: 16;
+            text-shadow: 0 0 3px black;
         }
-        
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            #cannon {
+        @keyframes coinAnim {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-70px) scale(1.3); opacity: 0; }
+        }
+
+        #power-ups {
+            position: absolute;
+            top: 60px;
+            left: 10px;
+            display: flex;
+            gap: 8px;
+            z-index: 20;
+            flex-wrap: wrap;
+            max-width: 90%;
+        }
+        .power-up {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+            min-width: 70px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .power-up:active {
+            transform: translateY(3px);
+        }
+        .power-up-icon {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        .power-up-cost {
+            color: gold;
+            font-weight: bold;
+            margin-top: 3px;
+            font-size: 10px;
+        }
+        .power-up.active {
+            background: rgba(50, 150, 50, 0.7);
+            border-color: rgba(0, 255, 0, 0.3);
+        }
+        .power-up-cooldown {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 0 0 10px 10px;
+            overflow: hidden;
+        }
+        .power-up-cooldown-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(to right, #ff6600, #ff3300);
+            transform-origin: left;
+            transform: scaleX(0);
+        }
+
+        #instructions {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            z-index: 40;
+            border: 2px solid rgba(255, 165, 0, 0.5);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+            width: 95%;
+        }
+        #instructions h2 {
+            color: #ff8a00;
+            margin-bottom: 15px;
+            font-size: 24px;
+            text-shadow: 0 0 8px rgba(255, 138, 0, 0.7);
+        }
+        #instructions p {
+            margin-bottom: 10px;
+            text-align: left;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+        #start-game {
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background: linear-gradient(to bottom, #ff6600, #cc5200);
+            border: none;
+            border-radius: 20px;
+        }
+
+        #joystick-area {
+            position: absolute;
+            bottom: 100px;
+            left: 20px;
+            width: 100px;
+            height: 100px;
+            z-index: 10;
+            display: none;
+        }
+        #joystick {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            touch-action: none;
+        }
+
+        #combo-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 32px;
+            color: gold;
+            font-weight: bold;
+            text-shadow: 0 0 8px black, 0 0 15px gold;
+            z-index: 25;
+            opacity: 0;
+            pointer-events: none;
+            animation: comboAnim 1s forwards;
+        }
+        @keyframes comboAnim {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            20% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+            80% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0; }
+        }
+
+        #boss-health {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            z-index: 21;
+            display: none;
+        }
+        #boss-health-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(to right, #ff0000, #ff6600);
+            transition: width 0.3s;
+        }
+        #boss-health-label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 2px black;
+        }
+
+        #wave-display {
+            position: absolute;
+            top: 35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 14px;
+            z-index: 20;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #00ccff;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        @media (max-width: 500px) {
+            .player {
                 width: 60px;
                 height: 60px;
             }
-            
-            #fire-btn {
-                padding: 12px 20px;
+            #main-player {
+                bottom: 5px;
+            }
+            .bot-player {
+                width: 50px;
+                height: 50px;
+            }
+            #bot1, #bot2 {
+                bottom: 5px;
+            }
+            #bot3 {
+                top: 5px;
+            }
+            .cannon {
+                width: 12px;
+                height: 25px;
+                bottom: 30px;
+            }
+            #controls {
+                bottom: 10px;
+                gap: 5px;
+            }
+            button {
+                padding: 6px 12px;
+                font-size: 12px;
+                min-width: 60px;
+            }
+            #score-display, #bet-display, #multiplier-display {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+            .display-icon {
+                font-size: 14px;
+            }
+            #auto-aim-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+                bottom: 60px;
+                right: 5px;
+            }
+            #power-ups {
+                top: 50px;
+                left: 5px;
+                gap: 5px;
+            }
+            .power-up {
+                padding: 5px 8px;
+                min-width: 60px;
+                font-size: 10px;
+            }
+            .power-up-icon {
                 font-size: 16px;
             }
-            
-            #ui {
-                font-size: 16px;
-                padding: 8px 12px;
+            .fish-value {
+                font-size: 8px;
+                bottom: -12px;
+            }
+            #joystick-area {
+                bottom: 80px;
+                left: 10px;
+                width: 80px;
+                height: 80px;
+            }
+            #joystick {
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        @media (max-height: 600px) {
+            #power-ups {
+                top: 10px;
+                flex-direction: column;
+            }
+            #auto-aim-btn {
+                bottom: 120px;
             }
         }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <div id="background"></div>
-        <div id="game-area"></div>
-        <div id="cannon"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBmaWxsPSIjMDAwIiBkPSJNNDk2IDEyOEgyNTZjLTguODQgMC0xNiA3LjE2LTE2IDE2djY0SDE2Yy04Ljg0IDAtMTYgNy4xNi0xNiAxNnYxNjBjMCA4Ljg0IDcuMTYgMTYgMTYgMTZoMjI0djY0YzAgOC44NCA3LjE2IDE2IDE2IDE2aDI0MGM4Ljg0IDAgMTYtNy4xNiAxNi0xNlYxNDRjMC04Ljg0LTcuMTYtMTYtMTYtMTZ6Ii8+PC9zdmc+" alt="مدفع"></div>
-        <div id="aim-pointer"></div>
+        <div id="water"></div>
+        <div id="bubbles"></div>
+        <div id="fishes"></div>
+        <div id="projectiles"></div>
         
-        <div id="ui">
-            <span id="currency-icon">💎</span>
-            <span id="currency">10000</span>
+        <!-- Bot Oyuncular -->
+        <div id="bot1" class="player bot-player"></div>
+        <div id="bot2" class="player bot-player"></div>
+        <div id="bot3" class="player bot-player"></div>
+        
+        <!-- Ana Oyuncu -->
+        <div id="main-player" class="player"></div>
+        <div class="cannon" id="cannon"></div>
+
+        <!-- UI Elementleri -->
+        <div id="score-display"><span class="display-icon">💰</span> <span id="score">500</span></div>
+        <div id="bet-display"><span class="display-icon">🎯</span> <span id="bet">10</span></div>
+        <div id="multiplier-display"><span class="display-icon">⚡</span> <span id="multiplier">1x</span></div>
+
+        <div id="power-ups">
+            <div class="power-up" id="power-up-1" data-cost="200">
+                <div class="power-up-icon">🎯</div>
+                <div>Hedef Kilidi</div>
+                <div class="power-up-cost">200</div>
+                <div class="power-up-cooldown"><div class="power-up-cooldown-bar"></div></div>
+            </div>
+            <div class="power-up" id="power-up-2" data-cost="300">
+                <div class="power-up-icon">💣</div>
+                <div>3'lü Atış</div>
+                <div class="power-up-cost">300</div>
+                <div class="power-up-cooldown"><div class="power-up-cooldown-bar"></div></div>
+            </div>
         </div>
-        
-        <button id="fire-btn">إطلاق</button>
-        <button id="settings-btn">⚙️</button>
-        
-        <div id="upgrade-panel">
-            <h3>ترقية المدفع</h3>
-            <p>القوة الحالية: <span id="current-power">1</span></p>
-            <p>التكلفة: <span id="upgrade-cost">500</span> 💎</p>
-            <button id="upgrade-btn">ترقية</button>
+
+        <div id="controls">
+            <button id="decrease-bet">-10</button>
+            <button id="increase-bet">+10</button>
+        </div>
+        <button id="auto-aim-btn">🤖</button>
+
+        <!-- Joystick (Mobil için) -->
+        <div id="joystick-area">
+            <div id="joystick"></div>
+        </div>
+
+        <!-- Boss Sağlık Çubuğu -->
+        <div id="boss-health">
+            <div id="boss-health-bar"></div>
+            <div id="boss-health-label">BOSS: 100%</div>
+        </div>
+
+        <!-- Dalga Göstergesi -->
+        <div id="wave-display">Dalga: 1</div>
+
+        <!-- Efektler -->
+        <div id="combo-display"></div>
+
+        <!-- Oyun Bitti Ekranı -->
+        <div id="game-over">
+            <h1>Oyun Bitti!</h1>
+            <div id="game-over-stats">
+                <div><span>Toplam Puan:</span> <span id="final-score">0</span></div>
+                <div><span>Vurulan Balık:</span> <span id="final-fishes">0</span></div>
+                <div><span>En Yüksek Kombo:</span> <span id="final-combo">0</span></div>
+                <div><span>Ulaşılan Dalga:</span> <span id="final-wave">0</span></div>
+                <div class="bot-stat"><span>Bot 1 Puan:</span> <span id="bot1-score">0</span></div>
+                <div class="bot-stat"><span>Bot 2 Puan:</span> <span id="bot2-score">0</span></div>
+                <div class="bot-stat"><span>Bot 3 Puan:</span> <span id="bot3-score">0</span></div>
+            </div>
+            <button id="restart">YENİDEN BAŞLA</button>
+        </div>
+
+        <!-- Talimatlar -->
+        <div id="instructions">
+            <h2>ULTRA BALIK AVI</h2>
+            <p>Fareyi hareket ettirerek topçuyu yönlendirin ve tıklayarak mermi atın. Balıkları vurarak altın kazanın.</p>
+            <p>Her atış bahis miktarınız kadar altın harcar.</p>
+            <p>Balıkları vurma şansınız %30 (zor mod).</p>
+            <p>3 bot oyuncu sizinle birlikte oynayacak!</p>
+            <button id="start-game">OYUNA BAŞLA</button>
         </div>
     </div>
 
-    <audio id="shot-sound" src="data:audio/mpeg;base64,SUQzBAAAAAABEVRYVFgAAAAsAAAAATI1OTsgT0sgTEFORwAAABRudW1iZXIgb2YgY2hhbm5lbHM6IDEATVRTZAAAAAYAAAAAAABTb3VuZEZvcmdlIHZlcnNpb24gNi4wLjEwMABJU1JjAAAAJgAAAExPVE9TIFNPVU5EIEVGRkVDVCAtIFNIT1QgM0QgLSBQSVNUT0wATVRTZAAAAAYAAAAAAABTb3VuZEZvcmdlIHZlcnNpb24gNi4wLjEwMABJU1JjAAAAJgAAAExPVE9TIFNPVU5EIEVGRkVDVCAtIFNIT1QgM0QgLSBQSVNUT0wA" preload="auto"></audio>
-    <audio id="hit-sound" src="data:audio/mpeg;base64,SUQzBAAAAAABEVRYVFgAAAAsAAAAATI1OTsgT0sgTEFORwAAABRudW1iZXIgb2YgY2hhbm5lbHM6IDEATVRTZAAAAAYAAAAAAABTb3VuZEZvcmdlIHZlcnNpb24gNi4wLjEwMABJU1JjAAAAJgAAAExPVE9TIFNPVU5EIEVGRkVDVCAtIEhJVCAzRCAtIFdFQVBPThBNVFNkAAAABgAAAAAAAFNvdW5kRm9yZ2UgdmVyc2lvbiA2LjAuMTAwAElTUmMAAAAmAAAATElHSFQgU1BFQ0lBTCBTT1VORCAtIEhJVCAzRCAtIFdFQVBPThBNVFNkAAAABgAAAAAAAFNvdW5kRm9yZ2UgdmVyc2lvbiA2LjAuMTAwAElTUmMAAAAmAAAATElHSFQgU1BFQ0lBTCBTT1VORCAtIEhJVCAzRCAtIFdFQVBPThA=" preload="auto"></audio>
-    <audio id="bubble-sound" src="data:audio/mpeg;base64,SUQzBAAAAAABEVRYVFgAAAAsAAAAATI1OTsgT0sgTEFORwAAABRudW1iZXIgb2YgY2hhbm5lbHM6IDEATVRTZAAAAAYAAAAAAABTb3VuZEZvcmdlIHZlcnNpb24gNi4wLjEwMABJU1JjAAAAGgAAAExPVE9TIFdFQVBPTiBTT1VORCAtIEZJU0gATVRTZAAAAAYAAAAAAABTb3VuZEZvcmdlIHZlcnNpb24gNi4wLjEwMABJU1JjAAAAGgAAAExPVE9TIFdFQVBPTiBTT1VORCAtIEZJU0gA" preload="auto"></audio>
-    <audio id="bg-music" loop src="data:audio/mpeg;base64,SUQzBAAAAAABEVRYVFgAAAAsAAAAATI1OTsgT0sgTEFORwAAABRudW1iZXIgb2YgY2hhbm5lbHM6IDEATVRTZAAAAAYAAAAAAABTb3VuZEZvcmdlIHZlcnNpb24gNi4wLjEwMABJU1JjAAAAJgAAAExPVE9TIFNPVU5EIEVGRkVDVCAtIFdBUlJJT1IgLSBTV0lORwBNVFNkAAAABgAAAAAAAFNvdW5kRm9yZ2UgdmVyc2lvbiA2LjAuMTAwAElTUmMAAAAmAAAATElHSFQgU1BFQ0lBTCBTT1VORCAtIFdBUlJJT1IgLSBTV0lORxBNVFNkAAAABgAAAAAAAFNvdW5kRm9yZ2UgdmVyc2lvbiA2LjAuMTAwAElTUmMAAAAmAAAATElHSFQgU1BFQ0lBTCBTT1VORCAtIFdBUlJJT1IgLSBTV0lORxA=" preload="auto"></audio>
-
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // عناصر DOM
-            const gameArea = document.getElementById('game-area');
-            const cannon = document.getElementById('cannon');
-            const aimPointer = document.getElementById('aim-pointer');
-            const fireBtn = document.getElementById('fire-btn');
-            const currencyDisplay = document.getElementById('currency');
-            const upgradePanel = document.getElementById('upgrade-panel');
-            const upgradeBtn = document.getElementById('upgrade-btn');
-            const currentPowerDisplay = document.getElementById('current-power');
-            const upgradeCostDisplay = document.getElementById('upgrade-cost');
-            const settingsBtn = document.getElementById('settings-btn');
+        // Oyun konfigürasyonu
+        const config = {
+            initialScore: 500,
+            minBet: 10,
+            maxBet: 1000,
+            betStep: 10,
+            baseHitChance: 0.3,
+            comboDecayTime: 3000,
+            baseComboMultiplier: 0.1,
+            maxCombo: 15,
+            fishSpawnInterval: 1500,
+            maxFishes: 12,
+            specialFishChance: 0.04,
+            bossWaveInterval: 5,
+            powerUpCooldown: 15000,
+            botUpdateInterval: 500,
+            botHitChance: 0.25,
+            botReactionTime: { min: 300, max: 1000 }
+        };
+
+        // Balık tipleri
+        const fishTypes = [
+            { emoji: "🐟", name: "Küçük Balık", minSize: 30, maxSize: 50, speed: 1.8, 
+              minValue: 10, maxValue: 30, health: 1, winChance: 0.3, common: true },
+            { emoji: "🐠", name: "Renkli Balık", minSize: 40, maxSize: 70, speed: 1.5, 
+              minValue: 20, maxValue: 50, health: 1, winChance: 0.3, common: true },
+            { emoji: "🐡", name: "Kirpi Balık", minSize: 60, maxSize: 90, speed: 1.0, 
+              minValue: 40, maxValue: 80, health: 2, winChance: 0.3, common: true },
+            { emoji: "🦈", name: "Köpek Balığı", minSize: 80, maxSize: 120, speed: 1.7, 
+              minValue: 70, maxValue: 120, health: 3, winChance: 0.25, common: true },
+            { emoji: "💰", name: "Hazine Balığı", minSize: 50, maxSize: 70, speed: 2.2, 
+              minValue: 200, maxValue: 400, health: 1, winChance: 0.4, rare: true }
+        ];
+
+        // Boss balığı
+        const bossFish = {
+            emoji: "🐙", name: "DEV AHTAPOT", size: 150, speed: 0.4, 
+            value: 1500, health: 15, winChance: 0.15
+        };
+
+        // Oyun durumu
+        const state = {
+            score: config.initialScore,
+            bet: config.minBet,
+            gameActive: false,
+            fishes: [],
+            projectiles: [],
+            autoAim: false,
+            lastAutoAimTime: 0,
+            lastFishSpawnTime: 0,
+            lastComboTime: 0,
+            combo: 0,
+            multiplier: 1,
+            wave: 1,
+            bossActive: false,
+            bossHealth: 0,
+            powerUps: {
+                targetLock: { active: false, target: null, cooldown: 0 },
+                tripleShot: { active: false, cooldown: 0 }
+            },
+            stats: {
+                fishesCaught: 0,
+                highestCombo: 0,
+                totalShots: 0,
+                totalHits: 0
+            },
+            bots: [
+                { id: 'bot1', score: 0, element: null, lastShot: 0, target: null },
+                { id: 'bot2', score: 0, element: null, lastShot: 0, target: null },
+                { id: 'bot3', score: 0, element: null, lastShot: 0, target: null }
+            ],
+            joystick: {
+                active: false,
+                startX: 0,
+                startY: 0,
+                moveX: 0,
+                moveY: 0
+            }
+        };
+
+        // DOM elementleri
+        const elements = {
+            gameContainer: document.getElementById('game-container'),
+            water: document.getElementById('water'),
+            bubbles: document.getElementById('bubbles'),
+            fishesContainer: document.getElementById('fishes'),
+            projectilesContainer: document.getElementById('projectiles'),
+            cannon: document.getElementById('cannon'),
+            player: document.getElementById('main-player'),
+            scoreDisplay: document.getElementById('score'),
+            betDisplay: document.getElementById('bet'),
+            multiplierDisplay: document.getElementById('multiplier'),
+            increaseBetBtn: document.getElementById('increase-bet'),
+            decreaseBetBtn: document.getElementById('decrease-bet'),
+            gameOverScreen: document.getElementById('game-over'),
+            finalScoreDisplay: document.getElementById('final-score'),
+            finalFishesDisplay: document.getElementById('final-fishes'),
+            finalComboDisplay: document.getElementById('final-combo'),
+            finalWaveDisplay: document.getElementById('final-wave'),
+            bot1Score: document.getElementById('bot1-score'),
+            bot2Score: document.getElementById('bot2-score'),
+            bot3Score: document.getElementById('bot3-score'),
+            restartBtn: document.getElementById('restart'),
+            autoAimBtn: document.getElementById('auto-aim-btn'),
+            instructions: document.getElementById('instructions'),
+            startGameBtn: document.getElementById('start-game'),
+            comboDisplay: document.getElementById('combo-display'),
+            powerUp1: document.getElementById('power-up-1'),
+            powerUp2: document.getElementById('power-up-2'),
+            bossHealthBar: document.getElementById('boss-health'),
+            bossHealthFill: document.getElementById('boss-health-bar'),
+            bossHealthLabel: document.getElementById('boss-health-label'),
+            waveDisplay: document.getElementById('wave-display'),
+            joystickArea: document.getElementById('joystick-area'),
+            joystick: document.getElementById('joystick')
+        };
+
+        // Oyun başlatma
+        function initGame() {
+            createBubbles();
+            setupEventListeners();
+            updateUI();
             
-            // عناصر الصوت
-            const shotSound = document.getElementById('shot-sound');
-            const hitSound = document.getElementById('hit-sound');
-            const bubbleSound = document.getElementById('bubble-sound');
-            const bgMusic = document.getElementById('bg-music');
+            // Bot elementlerini ayarla
+            state.bots.forEach(bot => {
+                bot.element = document.getElementById(bot.id);
+            });
             
-            // متغيرات اللعبة
-            let currency = 10000;
-            let cannonPower = 1;
-            let shotCost = 1;
-            let upgradeCost = 500;
-            let fishList = [];
-            let bullets = [];
-            let bubbles = [];
-            let gameActive = true;
-            let aimAssist = true;
-            
-            // أنواع الأسماك (باستخدام صور SVG مضمنة)
-            const fishTypes = [
-                {
-                    name: "سمكة صغيرة",
-                    image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMDAgMTAwIj48cGF0aCBmaWxsPSIjRkY3MzMzIiBkPSJNMTgwIDUwQzE4MCAyMi40IDE1Ny42IDAgMTMwIDBTODAgMjIuNCA4MCA1MHMyMi40IDUwIDUwIDUwIDEwMC0yMi40IDEwMC01MHoiLz48cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMTUwIDUwYzAgMTEuMS04LjkgMjAtMjAgMjBTMTEwIDYxLjEgMTEwIDUwczguOS0yMCAyMC0yMCAyMCA4LjkgMjAgMjB6Ii8+PHBhdGggZmlsbD0iIzAwMCIgZD0iTTE0NSA1MGMwIDIuOC0yLjIgNS01IDVzLTUtMi4yLTUtNSAyLjItNSA1LTUgNSAyLjIgNSA1eiIvPjxwYXRoIGZpbGw9IiNGRjczMzMiIGQ9Ik0xMCA1MGg0MHYxMEgxMHoiLz48L3N2Zz4=",
-                    width: 80,
-                    height: 40,
-                    speed: 1.5,
-                    health: 7,
-                    value: 100
-                },
-                {
-                    name: "سمكة متوسطة",
-                    image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNDAgMTAwIj48cGF0aCBmaWxsPSIjRkZDNjMzIiBkPSJNMjIwIDUwQzIyMCAyMi40IDE5Ny42IDAgMTcwIDBTMTIwIDIyLjQgMTIwIDUwczIyLjQgNTAgNTAgNTAgNTAtMjIuNCA1MC01MHoiLz48cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMTkwIDUwYzAgMTEuMS04LjkgMjAtMjAgMjBzLTIwLTguOS0yMC0yMCA4LjktMjAgMjAtMjAgMjAgOC45IDIwIDIwem0tNDAgMGMwIDExLjEtOC45IDIwLTIwIDIwcy0yMC04LjktMjAtMjAgOC45LTIwIDIwLTIwIDIwIDguOSAyMCAyMHoiLz48cGF0aCBmaWxsPSIjMDAwIiBkPSJNMTg1IDUwYzAgMi44LTIuMiA1LTUgNXMtNS0yLjItNS01IDIuMi01IDUtNSA1IDIuMiA1IDV6bS00MCAwYzAgMi44LTIuMiA1LTUgNXMtNS0yLjItNS01IDIuMi01IDUtNSA1IDIuMiA1IDV6Ii8+PHBhdGggZmlsbD0iI0ZGQzYzMyIgZD0iTTEwIDUwaDQwdjEwSDEweiIvPjwvc3ZnPg==",
-                    width: 100,
-                    height: 50,
-                    speed: 1.2,
-                    health: 8,
-                    value: 300
-                },
-                {
-                    name: "سمكة كبيرة",
-                    image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMDAgMTIwIj48cGF0aCBmaWxsPSIjMzM3QUJGIiBkPSJNMjcwIDYwQzI3MCAyNi45IDI0My4xIDAgMjEwIDBTMTUwIDI2LjkgMTUwIDYwczI2LjkgNjAgNjAgNjAgNjAtMjYuOSA2MC02MHoiLz48cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMjQwIDYwYzAgMTEuMS04LjkgMjAtMjAgMjBzLTIwLTguOS0yMC0yMCA4LjktMjAgMjAtMjAgMjAgOC45IDIwIDIwem0tNDAgMGMwIDExLjEtOC45IDIwLTIwIDIwcy0yMC04LjktMjAtMjAgOC45LTIwIDIwLTIwIDIwIDguOSAyMCAyMHptLTQwIDBjMCAxMS4xLTguOSAyMC0yMCAyMHMtMjAtOC45LTIwLTIwIDguOS0yMCAyMC0yMCAyMCA4LjkgMjAgMjB6Ii8+PHBhdGggZmlsbD0iIzAwMCIgZD0iTTIzNSA2MGMwIDIuOC0yLjIgNS01IDVzLTUtMi4yLTUtNSAyLjItNSA1LTUgNSAyLjIgNSA1em0tNDAgMGMwIDIuOC0yLjIgNS01IDVzLTUtMi4yLTUtNSAyLjItNSA1LTUgNSAyLjIgNSA1em0tNDAgMGMwIDIuOC0yLjIgNS01IDVzLTUtMi4yLTUtNSAyLjItNSA1LTUgNSAyLjIgNSA1eiIvPjxwYXRoIGZpbGw9IiMzMzdBQkYiIGQ9Ik0xNSA2MGg0MHYxNUgxNXoiLz48L3N2Zz4=",
-                    width: 120,
-                    height: 60,
-                    speed: 0.8,
-                    health: 9,
-                    value: 700
-                },
-                {
-                    name: "سمكة نادرة",
-                    image: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMDAgMTUwIj48cGF0aCBmaWxsPSIjRkYzM0ZGIiBkPSJNMjcwIDc1QzI3MCAzMy42IDIzNi40IDAgMTk1IDBTMTIwIDMzLjYgMTIwIDc1czMzLjYgNzUgNzUgNzUgNzUtMzMuNiA3NS03NXoiLz48cGF0aCBmaWxsPSIjRkZGRkZGIiBkPSJNMjQwIDc1YzAgMTEuMS04LjkgMjAtMjAgMjBzLTIwLTguOS0yMC0yMCA4LjktMjAgMjAtMjAgMjAgOC45IDIwIDIwem0tNDAgMGMwIDExLjEtOC45IDIwLTIwIDIwcy0yMC04LjktMjAtMjAgOC45LTIwIDIwLTIwIDIwIDguOSAyMCAyMHptLTQwIDBjMCAxMS4xLTguOSAyMC0yMCAyMHMtMjAtOC45LTIwLTIwIDguOS0yMCAyMC0yMCAyMCA4LjkgMjAgMjB6Ii8+PHBhdGggZmlsbD0iIzAwMCIgZD0iTTIzNSA3NWMwIDIuOC0yLjIgNS01IDVzLTUtMi4yLTUtNSAyLjItNSA1LTUgNSAyLjIgNSA1em0tNDAgMGMwIDIuOC0yLjIgNS01IDVzLTUtMi4yLTUtNSAyLjItNSA1LTUgNSAyLjIgNSA1em0tNDAgMGMwIDIuOC0yLjIgNS01IDVzLTUtMi4yLTUtNSAyLjItNSA1LTUgNSAyLjIgNSA1eiIvPjxwYXRoIGZpbGw9IiNGRjMzRkYiIGQ9Ik0xNSA3NWg0MHYyMEgxNXoiLz48cGF0aCBmaWxsPSIjRkY5OTAwIiBkPSJNMTUwIDQwYzAgMTEuMS04LjkgMjAtMjAgMjBzLTIwLTguOS0yMC0yMCA4LjktMjAgMjAtMjAgMjAgOC45IDIwIDIwem0tNDAgMGMwIDExLjEtOC45IDIwLTIwIDIwcy0yMC04LjktMjAtMjAgOC45LTIwIDIwLTIwIDIwIDguOSAyMCAyMHptLTQwIDBjMCAxMS4xLTguOSAyMC0yMCAyMHMtMjAtOC45LTIwLTIwIDguOS0yMCAyMC0yMCAyMCA4LjkgMjAgMjB6Ii8+PC9zdmc+",
-                    width: 150,
-                    height: 75,
-                    speed: 0.5,
-                    health: 10,
-                    value: 5000
-                }
-            ];
-            
-            // تحديث واجهة المستخدم
-            function updateUI() {
-                currencyDisplay.textContent = currency.toLocaleString('ar-EG');
-                currentPowerDisplay.textContent = cannonPower;
-                upgradeCostDisplay.textContent = upgradeCost;
-                
-                // تعطيل زر الترقية إذا لم يكن هناك عملات كافية
-                upgradeBtn.disabled = currency < upgradeCost;
+            // Mobil kontrolü
+            if ('ontouchstart' in window) {
+                setupMobileControls();
             }
             
-            // إنشاء فقاعات
-            function createBubbles(x, y, count) {
-                for (let i = 0; i < count; i++) {
-                    const size = Math.random() * 15 + 5;
-                    const bubble = document.createElement('div');
-                    bubble.className = 'bubble';
-                    bubble.style.width = `${size}px`;
-                    bubble.style.height = `${size}px`;
-                    bubble.style.left = `${x + Math.random() * 20 - 10}px`;
-                    bubble.style.top = `${y + Math.random() * 20 - 10}px`;
-                    gameArea.appendChild(bubble);
-                    
-                    // إزالة الفقاعة بعد انتهاء الأنيميشن
-                    setTimeout(() => {
-                        if (bubble.parentNode) {
-                            gameArea.removeChild(bubble);
-                        }
-                    }, 1500);
-                }
-                
-                // تشغيل صوت الفقاعات
-                bubbleSound.currentTime = 0;
-                bubbleSound.play();
-            }
+            gameLoop();
+        }
+
+        // Oyunu başlat
+        function startGame() {
+            state.gameActive = true;
+            elements.instructions.style.display = 'none';
+            spawnFish();
+            showWave();
             
-            // إنشاء سمكة جديدة
-            function createFish() {
-                const type = Math.random() < 0.05 ? fishTypes[3] : // 5% سمكة نادرة
-                             Math.random() < 0.3 ? fishTypes[2] :  // 30% سمكة كبيرة
-                             Math.random() < 0.6 ? fishTypes[1] :  // 60% سمكة متوسطة
-                             fishTypes[0];                          // الباقي سمكة صغيرة
-                
-                const fish = document.createElement('div');
-                fish.className = 'fish';
-                fish.style.width = `${type.width}px`;
-                fish.style.height = `${type.height}px`;
-                
-                // تحديد اتجاه السمكة (يمين أو يسار)
-                const direction = Math.random() < 0.5 ? 1 : -1;
-                fish.dataset.direction = direction;
-                
-                // تحديد موقع البداية
-                let startX, startY;
-                if (direction === 1) { // تتحرك من اليسار إلى اليمين
-                    startX = -type.width;
-                    startY = Math.random() * (window.innerHeight - type.height);
-                } else { // تتحرك من اليمين إلى اليسار
-                    startX = window.innerWidth;
-                    startY = Math.random() * (window.innerHeight - type.height);
-                }
-                
-                fish.style.left = `${startX}px`;
-                fish.style.top = `${startY}px`;
-                
-                // قلب السمكة حسب الاتجاه
-                fish.style.transform = direction === 1 ? 'scaleX(1)' : 'scaleX(-1)';
-                
-                // إضافة صورة السمكة
-                const fishImg = document.createElement('img');
-                fishImg.src = type.image;
-                fishImg.alt = type.name;
-                fish.appendChild(fishImg);
-                
-                // إضافة السمكة إلى منطقة اللعبة
-                gameArea.appendChild(fish);
-                
-                // حفظ بيانات السمكة
-                fish.dataset.type = JSON.stringify(type);
-                fish.dataset.health = type.health;
-                fish.dataset.speed = type.speed * (Math.random() * 0.5 + 0.75); // سرعة عشوائية
-                
-                // تحريك السمكة
-                moveFish(fish);
-                
-                // إضافة السمكة إلى القائمة
-                fishList.push(fish);
-                
-                // تحريك الزعانف
-                setInterval(() => {
-                    fish.style.animation = 'fish-swim 1s infinite';
-                }, 100);
+            // Botları başlat
+            state.bots.forEach(bot => {
+                bot.score = Math.floor(Math.random() * 200) + 100;
+                botUpdate(bot);
+            });
+        }
+
+        // Balık oluştur
+        function spawnFish() {
+            if (!state.gameActive) return;
+            if (state.fishes.length >= config.maxFishes) {
+                setTimeout(spawnFish, 500);
+                return;
             }
-            
-            // تحريك السمكة
-            function moveFish(fish) {
-                const type = JSON.parse(fish.dataset.type);
-                const direction = parseInt(fish.dataset.direction);
-                const speed = parseFloat(fish.dataset.speed);
-                
-                let x = parseFloat(fish.style.left);
-                let y = parseFloat(fish.style.top);
-                
-                // تغيير الاتجاه أحياناً
-                if (Math.random() < 0.005) {
-                    fish.dataset.direction = direction * -1;
-                    fish.style.transform = direction === 1 ? 'scaleX(-1)' : 'scaleX(1)';
-                }
-                
-                // تغيير الاتجاه العمودي أحياناً
-                if (Math.random() < 0.01) {
-                    fish.dataset.verticalDirection = Math.random() < 0.5 ? 1 : -1;
-                }
-                
-                const verticalDirection = fish.dataset.verticalDirection || 1;
-                
-                // تحديث الموقع
-                x += speed * direction;
-                y += (Math.random() * 0.5) * verticalDirection;
-                
-                // التأكد من بقاء السمكة في الشاشة عمودياً
-                if (y < 0) {
-                    y = 0;
-                    fish.dataset.verticalDirection = 1;
-                } else if (y > window.innerHeight - type.height) {
-                    y = window.innerHeight - type.height;
-                    fish.dataset.verticalDirection = -1;
-                }
-                
-                fish.style.left = `${x}px`;
-                fish.style.top = `${y}px`;
-                
-                // إذا خرجت السمكة من الشاشة أفقياً، إزالتها
-                if ((direction === 1 && x > window.innerWidth) || 
-                    (direction === -1 && x < -type.width)) {
-                    const index = fishList.indexOf(fish);
-                    if (index > -1) {
-                        fishList.splice(index, 1);
-                        gameArea.removeChild(fish);
-                    }
-                    return;
-                }
-                
-                // الاستمرار في الحركة
-                requestAnimationFrame(() => moveFish(fish));
+
+            const now = Date.now();
+            if (now - state.lastFishSpawnTime < config.fishSpawnInterval) {
+                setTimeout(spawnFish, config.fishSpawnInterval - (now - state.lastFishSpawnTime));
+                return;
             }
+            state.lastFishSpawnTime = now;
+
+            // Boss kontrolü
+            if (!state.bossActive && state.wave % config.bossWaveInterval === 0 && 
+                state.fishes.length === 0 && Math.random() < 0.5) {
+                spawnBossFish();
+                return;
+            }
+
+            // Rastgele balık seç
+            let type;
+            if (Math.random() < config.specialFishChance) {
+                const rareFishes = fishTypes.filter(f => f.rare);
+                type = rareFishes[Math.floor(Math.random() * rareFishes.length)] || fishTypes[0];
+            } else {
+                const commonFishes = fishTypes.filter(f => f.common);
+                type = commonFishes[Math.floor(Math.random() * commonFishes.length)];
+            }
+
+            const fish = document.createElement("div");
+            fish.className = "fish";
+            fish.innerHTML = `<div>${type.emoji}</div><div class="fish-value">${type.minValue}-${type.maxValue}</div>`;
             
-            // إطلاق النار
-            function fireBullet(targetX, targetY) {
-                if (currency < shotCost) {
-                    showGameOver();
-                    return;
+            const size = Math.random() * (type.maxSize - type.minSize) + type.minSize;
+            const direction = Math.random() > 0.5 ? 1 : -1;
+            const startX = direction === 1 ? -size : window.innerWidth + size;
+            const startY = Math.random() * (window.innerHeight * 0.7);
+            const endX = direction === 1 ? window.innerWidth + size : -size;
+            const endY = startY + (Math.random() * 200 - 100);
+
+            fish.style.width = `${size}px`;
+            fish.style.height = `${size}px`;
+            fish.style.left = `${startX}px`;
+            fish.style.top = `${startY}px`;
+            fish.style.transform = `scaleX(${direction})`;
+            fish.style.fontSize = `${size * 0.5}px`;
+
+            if (type.rare) {
+                fish.style.filter = "drop-shadow(0 0 8px gold)";
+            }
+
+            const distance = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2);
+            const duration = (distance / (type.speed * 50)) * 1000;
+
+            const animation = fish.animate([
+                { left: `${startX}px`, top: `${startY}px` },
+                { left: `${endX}px`, top: `${endY}px` }
+            ], {
+                duration,
+                easing: 'linear',
+                fill: 'forwards'
+            });
+
+            const fishObj = {
+                element: fish,
+                name: type.name,
+                value: Math.floor(Math.random() * (type.maxValue - type.minValue + 1)) + type.minValue,
+                winChance: type.winChance,
+                health: type.health,
+                x: startX,
+                y: startY,
+                width: size,
+                height: size,
+                animation,
+                direction,
+                speed: type.speed,
+                type: type
+            };
+
+            fish.addEventListener("click", () => catchFish(fishObj));
+            elements.fishesContainer.appendChild(fish);
+            state.fishes.push(fishObj);
+
+            animation.onfinish = () => {
+                fish.remove();
+                state.fishes = state.fishes.filter(f => f !== fishObj);
+            };
+
+            setTimeout(spawnFish, Math.random() * 2000 + 1000);
+        }
+
+        // Boss balığı oluştur
+        function spawnBossFish() {
+            state.bossActive = true;
+            state.bossHealth = bossFish.health;
+            elements.bossHealthBar.style.display = 'block';
+            updateBossHealth();
+            
+            const fish = document.createElement("div");
+            fish.className = "fish boss-fish";
+            fish.innerHTML = `<div>${bossFish.emoji}</div><div class="fish-value">${bossFish.value}</div>`;
+            
+            const size = bossFish.size;
+            const direction = Math.random() > 0.5 ? 1 : -1;
+            const startX = direction === 1 ? -size : window.innerWidth + size;
+            const startY = Math.random() * (window.innerHeight * 0.6);
+            const endX = direction === 1 ? window.innerWidth + size : -size;
+            const endY = startY + (Math.random() * 200 - 100);
+
+            fish.style.width = `${size}px`;
+            fish.style.height = `${size}px`;
+            fish.style.left = `${startX}px`;
+            fish.style.top = `${startY}px`;
+            fish.style.transform = `scaleX(${direction})`;
+            fish.style.fontSize = `${size * 0.5}px`;
+            fish.style.filter = "drop-shadow(0 0 15px red)";
+            fish.style.zIndex = "6";
+
+            const distance = Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2);
+            const duration = (distance / (bossFish.speed * 50)) * 1000;
+
+            const animation = fish.animate([
+                { left: `${startX}px`, top: `${startY}px` },
+                { left: `${endX}px`, top: `${endY}px` }
+            ], {
+                duration,
+                easing: 'linear',
+                fill: 'forwards'
+            });
+
+            const fishObj = {
+                element: fish,
+                name: bossFish.name,
+                value: bossFish.value,
+                winChance: bossFish.winChance,
+                health: bossFish.health,
+                x: startX,
+                y: startY,
+                width: size,
+                height: size,
+                animation,
+                direction,
+                speed: bossFish.speed,
+                isBoss: true
+            };
+
+            fish.addEventListener("click", () => catchFish(fishObj));
+            elements.fishesContainer.appendChild(fish);
+            state.fishes.push(fishObj);
+
+            animation.onfinish = () => {
+                fish.remove();
+                state.fishes = state.fishes.filter(f => f !== fishObj);
+                if (state.bossActive) {
+                    state.bossActive = false;
+                    elements.bossHealthBar.style.display = 'none';
                 }
-                
-                currency -= shotCost;
+            };
+        }
+
+        // Mermi at
+        function shootProjectile(angle = null, isBot = false) {
+            if (!state.gameActive) return;
+            
+            if (!isBot && state.score < state.bet) return;
+            
+            const cannonRect = elements.cannon.getBoundingClientRect();
+            const cx = cannonRect.left + cannonRect.width / 2;
+            const cy = cannonRect.top + cannonRect.height / 2;
+
+            const finalAngle = angle !== null ? angle : 
+                parseFloat(elements.cannon.style.transform.match(/rotate\(([^)]+)deg\)/)[1]) * (Math.PI / 180);
+            
+            const projectile = document.createElement("div");
+            projectile.className = `projectile ${isBot ? 'bot-projectile' : ''}`;
+            projectile.style.left = `${cx}px`;
+            projectile.style.top = `${cy}px`;
+            elements.projectilesContainer.appendChild(projectile);
+
+            const speed = 10;
+            const vx = Math.cos(finalAngle) * speed;
+            const vy = Math.sin(finalAngle) * speed;
+
+            const projectileObj = {
+                element: projectile,
+                x: cx,
+                y: cy,
+                vx: vx,
+                vy: vy,
+                isBot: isBot
+            };
+            
+            state.projectiles.push(projectileObj);
+            
+            if (!isBot) {
+                state.stats.totalShots++;
+                state.score -= state.bet;
                 updateUI();
                 
-                // تشغيل صوت الإطلاق
-                shotSound.currentTime = 0;
-                shotSound.play();
-                
-                // إنشاء الرصاصة
-                const bullet = document.createElement('div');
-                bullet.className = 'bullet';
-                bullet.style.left = `${cannon.offsetLeft + cannon.offsetWidth / 2}px`;
-                bullet.style.top = `${cannon.offsetTop}px`;
-                gameArea.appendChild(bullet);
-                
-                // حساب اتجاه الرصاصة
-                const startX = cannon.offsetLeft + cannon.offsetWidth / 2;
-                const startY = cannon.offsetTop;
-                
-                const dx = targetX - startX;
-                const dy = targetY - startY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                const speed = 15;
-                
-                const vx = (dx / distance) * speed;
-                const vy = (dy / distance) * speed;
-                
-                // تحريك الرصاصة
-                let x = startX;
-                let y = startY;
-                
-                function moveBullet() {
-                    x += vx;
-                    y += vy;
-                    
-                    bullet.style.left = `${x}px`;
-                    bullet.style.top = `${y}px`;
-                    
-                    // التحقق من اصطدام الرصاصة بالسمك
-                    checkCollision(bullet, x, y);
-                    
-                    // إذا كانت الرصاصة خارج الشاشة، إزالتها
-                    if (x < 0 || x > window.innerWidth || y < 0 || y > window.innerHeight) {
-                        gameArea.removeChild(bullet);
-                        return;
-                    }
-                    
-                    requestAnimationFrame(moveBullet);
+                if (state.score <= 0) {
+                    gameOver();
                 }
-                
-                moveBullet();
             }
             
-            // التحقق من الاصطدام
-            function checkCollision(bullet, bulletX, bulletY) {
-                for (let i = 0; i < fishList.length; i++) {
-                    const fish = fishList[i];
-                    const fishRect = fish.getBoundingClientRect();
+            return projectileObj;
+        }
+
+        // Balık yakala
+        function catchFish(fish, isBot = false) {
+            if (!state.gameActive) return;
+
+            const win = Math.random() < fish.winChance;
+            fish.health--;
+
+            if (fish.health > 0) {
+                if (fish.isBoss) {
+                    state.bossHealth--;
+                    updateBossHealth();
+                }
+                createHitEffect(fish);
+                return;
+            }
+
+            if (!isBot) {
+                state.stats.totalHits++;
+                state.stats.fishesCaught++;
+                
+                if (win) {
+                    const value = Math.floor(fish.value * state.multiplier);
+                    state.score += value;
                     
-                    if (bulletX >= fishRect.left && bulletX <= fishRect.right &&
-                        bulletY >= fishRect.top && bulletY <= fishRect.bottom) {
+                    // Kombo artışı
+                    const now = Date.now();
+                    if (now - state.lastComboTime < config.comboDecayTime) {
+                        state.combo++;
+                        state.lastComboTime = now;
                         
-                        // تأثير الإصابة
-                        createHitEffect(bulletX, bulletY);
-                        
-                        // تخفيض صحة السمكة
-                        const currentHealth = parseInt(fish.dataset.health);
-                        const newHealth = currentHealth - cannonPower;
-                        fish.dataset.health = newHealth;
-                        
-                        // إذا نفدت صحة السمكة
-                        if (newHealth <= 0) {
-                            const type = JSON.parse(fish.dataset.type);
-                            const reward = type.value + Math.floor(Math.random() * type.value * 0.5);
-                            currency += reward;
-                            updateUI();
-                            
-                            // تأثير اختفاء السمكة
-                            createBubbles(fishRect.left + fishRect.width / 2, fishRect.top + fishRect.height / 2, 20);
-                            
-                            // إزالة السمكة
-                            gameArea.removeChild(fish);
-                            fishList.splice(i, 1);
-                        } else {
-                            // تأثير إصابة بدون موت
-                            createBubbles(fishRect.left + fishRect.width / 2, fishRect.top + fishRect.height / 2, 5);
+                        if (state.combo > state.stats.highestCombo) {
+                            state.stats.highestCombo = state.combo;
                         }
                         
-                        // تشغيل صوت الاصطدام
-                        hitSound.currentTime = 0;
-                        hitSound.play();
+                        state.multiplier = 1 + (state.combo * config.baseComboMultiplier);
                         
-                        // إزالة الرصاصة
-                        gameArea.removeChild(bullet);
-                        
-                        break;
+                        if (state.combo % 5 === 0) {
+                            showCombo(state.combo);
+                        }
+                    } else {
+                        state.combo = 1;
+                        state.lastComboTime = now;
+                        state.multiplier = 1 + config.baseComboMultiplier;
+                    }
+                    
+                    createCoinEffect(fish, `+${value}`);
+                } else {
+                    state.combo = 0;
+                    state.multiplier = 1;
+                    createCoinEffect(fish, "Kaybettin!", "red");
+                }
+            } else {
+                // Bot için
+                if (win) {
+                    const bot = state.bots.find(b => b.target === fish);
+                    if (bot) {
+                        bot.score += fish.value;
+                        bot.target = null;
                     }
                 }
             }
+
+            createHitEffect(fish);
+            fish.animation.cancel();
+            fish.element.remove();
+            state.fishes = state.fishes.filter(f => f !== fish);
             
-            // تأثير الإصابة
-            function createHitEffect(x, y) {
-                const effect = document.createElement('div');
-                effect.className = 'hit-effect';
-                effect.style.left = `${x}px`;
-                effect.style.top = `${y}px`;
-                gameArea.appendChild(effect);
+            if (fish.isBoss) {
+                state.bossActive = false;
+                elements.bossHealthBar.style.display = 'none';
+                nextWave();
+            }
+            
+            if (state.powerUps.targetLock.active && state.powerUps.targetLock.target === fish) {
+                state.powerUps.targetLock.active = false;
+                state.powerUps.targetLock.target = null;
+                elements.powerUp1.classList.remove("active");
+            }
+            
+            updateUI();
+        }
+
+        // Bot güncelleme
+        function botUpdate(bot) {
+            if (!state.gameActive) return;
+            
+            const now = Date.now();
+            
+            // Hedef belirle
+            if (!bot.target || Math.random() < 0.1) {
+                const visibleFishes = state.fishes.filter(f => 
+                    f.x > 0 && f.x < window.innerWidth && 
+                    f.y > 0 && f.y < window.innerHeight
+                );
+                
+                if (visibleFishes.length > 0) {
+                    bot.target = visibleFishes[Math.floor(Math.random() * visibleFishes.length)];
+                }
+            }
+            
+            // Ateş et
+            if (bot.target && now - bot.lastShot > getRandomReactionTime()) {
+                const botRect = bot.element.getBoundingClientRect();
+                const bx = botRect.left + botRect.width / 2;
+                const by = botRect.top + botRect.height / 2;
+                
+                const tx = bot.target.x + bot.target.width / 2;
+                const ty = bot.target.y + bot.target.height / 2;
+                
+                const dx = tx - bx;
+                const dy = ty - by;
+                const angle = Math.atan2(dy, dx);
+                
+                // Botun doğrultusunu ayarla
+                bot.element.style.transform = `scaleX(${dx > 0 ? 1 : -1})`;
+                
+                // Belirli bir şansla ateş et
+                if (Math.random() < config.botHitChance) {
+                    shootProjectile(angle, true);
+                    bot.lastShot = now;
+                }
+            }
+            
+            // Rastgele aralıklarla güncelle
+            setTimeout(() => botUpdate(bot), config.botUpdateInterval);
+        }
+
+        // Rastgele reaksiyon süresi
+        function getRandomReactionTime() {
+            return Math.random() * (config.botReactionTime.max - config.botReactionTime.min) + config.botReactionTime.min;
+        }
+
+        // UI güncelleme
+        function updateUI() {
+            elements.scoreDisplay.textContent = state.score;
+            elements.betDisplay.textContent = state.bet;
+            elements.multiplierDisplay.textContent = `${state.multiplier.toFixed(1)}x`;
+            
+            elements.decreaseBetBtn.disabled = state.bet <= config.minBet;
+            elements.increaseBetBtn.disabled = state.score < state.bet + config.betStep || 
+                                              state.bet >= config.maxBet;
+            
+            // Güçlendirme butonlarını güncelle
+            elements.powerUp1.querySelector('.power-up-cost').textContent = 
+                state.powerUps.targetLock.cooldown > 0 ? 
+                `${Math.ceil(state.powerUps.targetLock.cooldown/1000)}s` : 
+                elements.powerUp1.dataset.cost;
+                
+            elements.powerUp2.querySelector('.power-up-cost').textContent = 
+                state.powerUps.tripleShot.cooldown > 0 ? 
+                `${Math.ceil(state.powerUps.tripleShot.cooldown/1000)}s` : 
+                elements.powerUp2.dataset.cost;
+                
+            elements.powerUp1.style.opacity = state.score >= elements.powerUp1.dataset.cost && 
+                                           state.powerUps.targetLock.cooldown <= 0 ? '1' : '0.6';
+            elements.powerUp2.style.opacity = state.score >= elements.powerUp2.dataset.cost && 
+                                           state.powerUps.tripleShot.cooldown <= 0 ? '1' : '0.6';
+        }
+
+        // Oyun bitti
+        function gameOver() {
+            state.gameActive = false;
+            elements.finalScoreDisplay.textContent = state.score;
+            elements.finalFishesDisplay.textContent = state.stats.fishesCaught;
+            elements.finalComboDisplay.textContent = state.stats.highestCombo;
+            elements.finalWaveDisplay.textContent = state.wave;
+            elements.bot1Score.textContent = state.bots[0].score;
+            elements.bot2Score.textContent = state.bots[1].score;
+            elements.bot3Score.textContent = state.bots[2].score;
+            elements.gameOverScreen.style.display = "flex";
+            
+            // Animasyonları durdur
+            state.fishes.forEach(f => f.animation.cancel());
+            state.projectiles.forEach(p => {
+                if (p.element && p.element.parentNode) {
+                    p.element.remove();
+                }
+            });
+        }
+
+        // Yeniden başlat
+        function restartGame() {
+            // Temizle
+            state.fishes.forEach(f => {
+                f.animation.cancel();
+                f.element.remove();
+            });
+            elements.projectilesContainer.innerHTML = '';
+            
+            // Sıfırla
+            state.score = config.initialScore;
+            state.bet = config.minBet;
+            state.gameActive = true;
+            state.autoAim = false;
+            state.fishes = [];
+            state.projectiles = [];
+            state.combo = 0;
+            state.multiplier = 1;
+            state.wave = 1;
+            state.bossActive = false;
+            state.bossHealth = 0;
+            state.lastFishSpawnTime = 0;
+            state.lastComboTime = 0;
+            state.stats = {
+                fishesCaught: 0,
+                highestCombo: 0,
+                totalShots: 0,
+                totalHits: 0
+            };
+            state.powerUps = {
+                targetLock: { active: false, target: null, cooldown: 0 },
+                tripleShot: { active: false, cooldown: 0 }
+            };
+            
+            // Botları sıfırla
+            state.bots.forEach(bot => {
+                bot.score = Math.floor(Math.random() * 200) + 100;
+                bot.target = null;
+                bot.lastShot = 0;
+            });
+            
+            // UI güncelle
+            elements.autoAimBtn.classList.remove("active");
+            elements.gameOverScreen.style.display = "none";
+            elements.bossHealthBar.style.display = 'none';
+            updateUI();
+            
+            // Başlat
+            spawnFish();
+            showWave();
+            
+            // Botları başlat
+            state.bots.forEach(bot => {
+                botUpdate(bot);
+            });
+        }
+
+        // Baloncuk oluştur
+        function createBubbles() {
+            for (let i = 0; i < 30; i++) {
+                createBubble();
+            }
+        }
+
+        function createBubble() {
+            const bubble = document.createElement("div");
+            bubble.className = "bubble";
+            const size = Math.random() * 30 + 10;
+            const left = Math.random() * 100;
+            const duration = Math.random() * 15 + 5;
+            const delay = Math.random() * 10;
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${left}%`;
+            bubble.style.bottom = `-${size}px`;
+            bubble.style.animationDuration = `${duration}s`;
+            bubble.style.animationDelay = `${delay}s`;
+            bubble.style.opacity = Math.random() * 0.5 + 0.2;
+            elements.bubbles.appendChild(bubble);
+
+            setTimeout(() => {
+                bubble.remove();
+                createBubble();
+            }, (duration + delay) * 1000);
+        }
+
+        // Vuruş efekti
+        function createHitEffect(fish) {
+            const effect = document.createElement("div");
+            effect.className = "hit-effect";
+            effect.style.left = `${fish.x + fish.width / 2 - 30}px`;
+            effect.style.top = `${fish.y + fish.height / 2 - 30}px`;
+            elements.gameContainer.appendChild(effect);
+            setTimeout(() => effect.remove(), 400);
+        }
+
+        // Para efekti
+        function createCoinEffect(fish, text, color = "gold") {
+            const coin = document.createElement("div");
+            coin.className = "coin-effect";
+            coin.textContent = text;
+            coin.style.color = color;
+            coin.style.left = `${fish.x + fish.width / 2}px`;
+            coin.style.top = `${fish.y + fish.height / 2}px`;
+            elements.gameContainer.appendChild(coin);
+            setTimeout(() => coin.remove(), 1000);
+        }
+
+        // Kombo göster
+        function showCombo(combo) {
+            elements.comboDisplay.textContent = `${combo} COMBO!`;
+            elements.comboDisplay.style.opacity = 1;
+            
+            setTimeout(() => {
+                elements.comboDisplay.style.opacity = 0;
+            }, 800);
+        }
+
+        // Dalga göster
+        function showWave() {
+            elements.waveDisplay.textContent = `Dalga: ${state.wave}`;
+            elements.waveDisplay.style.opacity = 1;
+            
+            setTimeout(() => {
+                elements.waveDisplay.style.opacity = 0.7;
+            }, 1500);
+        }
+
+        // Sonraki dalga
+        function nextWave() {
+            state.wave++;
+            showWave();
+        }
+
+        // Boss canını güncelle
+        function updateBossHealth() {
+            const percent = (state.bossHealth / bossFish.health) * 100;
+            elements.bossHealthFill.style.width = `${percent}%`;
+            elements.bossHealthLabel.textContent = `BOSS: ${Math.round(percent)}%`;
+            
+            if (percent > 60) {
+                elements.bossHealthFill.style.background = "linear-gradient(to right, #00ff00, #00cc00)";
+            } else if (percent > 30) {
+                elements.bossHealthFill.style.background = "linear-gradient(to right, #ffff00, #ffcc00)";
+            } else {
+                elements.bossHealthFill.style.background = "linear-gradient(to right, #ff0000, #cc0000)";
+            }
+        }
+
+        // Hedef kilitle
+        function targetLock() {
+            if (state.powerUps.targetLock.cooldown > 0 || state.fishes.length === 0) return;
+            
+            if (state.powerUps.targetLock.active) {
+                state.powerUps.targetLock.active = false;
+                state.powerUps.targetLock.target = null;
+                elements.powerUp1.classList.remove("active");
+                return;
+            }
+            
+            const playerRect = elements.player.getBoundingClientRect();
+            const cx = playerRect.left + playerRect.width / 2;
+            const cy = playerRect.top + playerRect.height / 2;
+
+            let closestFish = null;
+            let minDist = Infinity;
+
+            state.fishes.forEach(f => {
+                const dx = f.x + f.width/2 - cx;
+                const dy = f.y + f.height/2 - cy;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist < minDist && dist < 400) {
+                    minDist = dist;
+                    closestFish = f;
+                }
+            });
+
+            if (closestFish) {
+                state.powerUps.targetLock.active = true;
+                state.powerUps.targetLock.target = closestFish;
+                elements.powerUp1.classList.add("active");
+                
+                state.powerUps.targetLock.cooldown = config.powerUpCooldown;
+                const cooldownBar = elements.powerUp1.querySelector('.power-up-cooldown-bar');
+                cooldownBar.style.transform = 'scaleX(1)';
+                cooldownBar.style.transition = `transform ${config.powerUpCooldown/1000}s linear`;
+                setTimeout(() => {
+                    cooldownBar.style.transform = 'scaleX(0)';
+                }, 10);
+                
+                closestFish.winChance += 0.2;
+                closestFish.element.style.boxShadow = '0 0 15px cyan';
                 
                 setTimeout(() => {
-                    gameArea.removeChild(effect);
-                }, 300);
-            }
-            
-            // عرض نافذة نفاد العملات
-            function showGameOver() {
-                alert('نفدت العملات! يمكنك مشاهدة إعلان للحصول على المزيد أو المحاولة لاحقاً.');
-            }
-            
-            // ترقية المدفع
-            function upgradeCannon() {
-                if (currency < upgradeCost) return;
-                
-                currency -= upgradeCost;
-                cannonPower += 1;
-                shotCost = Math.floor(cannonPower * 0.8);
-                upgradeCost = Math.floor(500 * Math.pow(1.5, cannonPower));
-                
-                updateUI();
-                
-                // إخفاء لوحة الترقية بعد الترقية
-                setTimeout(() => {
-                    upgradePanel.style.display = 'none';
-                }, 1000);
-            }
-            
-            // أحداث التحكم
-            function setupControls() {
-                // تحريك مؤشر التصويب
-                document.addEventListener('mousemove', (e) => {
-                    aimPointer.style.left = `${e.clientX}px`;
-                    aimPointer.style.top = `${e.clientY}px`;
-                    aimPointer.style.display = 'block';
-                });
-                
-                // إخفاء المؤشر عند مغادرة الشاشة
-                document.addEventListener('mouseleave', () => {
-                    aimPointer.style.display = 'none';
-                });
-                
-                // إطلاق النار بالنقر
-                document.addEventListener('click', (e) => {
-                    if (e.target !== fireBtn && e.target !== upgradeBtn && e.target !== settingsBtn) {
-                        fireBullet(e.clientX, e.clientY);
+                    if (state.powerUps.targetLock.active) {
+                        state.powerUps.targetLock.active = false;
+                        state.powerUps.targetLock.target = null;
+                        elements.powerUp1.classList.remove("active");
+                        
+                        if (closestFish && closestFish.element) {
+                            closestFish.element.style.boxShadow = '';
+                            closestFish.winChance -= 0.2;
+                        }
                     }
-                });
-                
-                // إطلاق النار بالزر
-                fireBtn.addEventListener('click', () => {
-                    const centerX = window.innerWidth / 2;
-                    const centerY = window.innerHeight / 2;
-                    fireBullet(centerX, centerY);
-                });
-                
-                // الترقية
-                upgradeBtn.addEventListener('click', upgradeCannon);
-                
-                // إظهار/إخفاء لوحة الترقية
-                settingsBtn.addEventListener('click', () => {
-                    upgradePanel.style.display = upgradePanel.style.display === 'none' ? 'block' : 'none';
-                });
-                
-                // التحكم باللمس
-                document.addEventListener('touchmove', (e) => {
-                    e.preventDefault();
-                    const touch = e.touches[0];
-                    aimPointer.style.left = `${touch.clientX}px`;
-                    aimPointer.style.top = `${touch.clientY}px`;
-                    aimPointer.style.display = 'block';
-                });
-                
-                document.addEventListener('touchend', () => {
-                    aimPointer.style.display = 'none';
-                });
-                
-                document.addEventListener('touchstart', (e) => {
-                    const touch = e.touches[0];
-                    fireBullet(touch.clientX, touch.clientY);
-                });
+                }, 10000);
+            }
+        }
+
+        // 3'lü atış
+        function tripleShot() {
+            if (state.powerUps.tripleShot.cooldown > 0 || state.score < state.bet * 3) return;
+            
+            state.powerUps.tripleShot.active = true;
+            state.powerUps.tripleShot.cooldown = config.powerUpCooldown;
+            
+            elements.powerUp2.classList.add("active");
+            const cooldownBar = elements.powerUp2.querySelector('.power-up-cooldown-bar');
+            cooldownBar.style.transform = 'scaleX(1)';
+            cooldownBar.style.transition = `transform ${config.powerUpCooldown/1000}s linear`;
+            setTimeout(() => {
+                cooldownBar.style.transform = 'scaleX(0)';
+            }, 10);
+            
+            setTimeout(() => {
+                state.powerUps.tripleShot.active = false;
+                elements.powerUp2.classList.remove("active");
+            }, 5000);
+        }
+
+        // Otomatik hedefleme
+        function toggleAutoAim() {
+            if (state.score < state.bet) return;
+            state.autoAim = !state.autoAim;
+            elements.autoAimBtn.classList.toggle("active", state.autoAim);
+        }
+
+        // Mobil kontroller
+        function setupMobileControls() {
+            elements.joystickArea.style.display = 'block';
+            
+            elements.joystickArea.addEventListener('touchstart', handleJoystickStart);
+            elements.joystickArea.addEventListener('touchmove', handleJoystickMove);
+            elements.joystickArea.addEventListener('touchend', handleJoystickEnd);
+            
+            // Ekranın herhangi bir yerine dokunulduğunda ateş et
+            elements.gameContainer.addEventListener('touchstart', (e) => {
+                if (state.gameActive && !e.target.closest('#joystick-area') && 
+                    !e.target.closest('.power-up') && e.touches.length === 1) {
+                    shootProjectile();
+                }
+            });
+        }
+
+        function handleJoystickStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = elements.joystickArea.getBoundingClientRect();
+            
+            state.joystick.active = true;
+            state.joystick.startX = rect.left + rect.width / 2;
+            state.joystick.startY = rect.top + rect.height / 2;
+            state.joystick.moveX = touch.clientX;
+            state.joystick.moveY = touch.clientY;
+            
+            elements.joystick.style.left = `${touch.clientX - rect.left}px`;
+            elements.joystick.style.top = `${touch.clientY - rect.top}px`;
+        }
+
+        function handleJoystickMove(e) {
+            if (!state.joystick.active) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = elements.joystickArea.getBoundingClientRect();
+            
+            state.joystick.moveX = touch.clientX;
+            state.joystick.moveY = touch.clientY;
+            
+            // Joystick hareketini sınırla
+            const maxDistance = 40;
+            const dx = touch.clientX - state.joystick.startX;
+            const dy = touch.clientY - state.joystick.startY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance > maxDistance) {
+                const angle = Math.atan2(dy, dx);
+                state.joystick.moveX = state.joystick.startX + Math.cos(angle) * maxDistance;
+                state.joystick.moveY = state.joystick.startY + Math.sin(angle) * maxDistance;
             }
             
-            // بدء اللعبة
-            function startGame() {
-                // تشغيل الموسيقى
-                bgMusic.volume = 0.3;
-                bgMusic.play();
+            elements.joystick.style.left = `${state.joystick.moveX - rect.left}px`;
+            elements.joystick.style.top = `${state.joystick.moveY - rect.top}px`;
+            
+            // Topçu döndürme
+            const playerRect = elements.player.getBoundingClientRect();
+            const cx = playerRect.left + playerRect.width / 2;
+            const cy = playerRect.top + playerRect.height / 2;
+            
+            const angle = Math.atan2(state.joystick.moveY - cy, state.joystick.moveX - cx) * 180 / Math.PI;
+            elements.cannon.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+        }
+
+        function handleJoystickEnd(e) {
+            if (!state.joystick.active) return;
+            e.preventDefault();
+            
+            state.joystick.active = false;
+            const rect = elements.joystickArea.getBoundingClientRect();
+            elements.joystick.style.left = `${rect.width / 2}px`;
+            elements.joystick.style.top = `${rect.height / 2}px`;
+        }
+
+        // Oyun döngüsü
+        function gameLoop() {
+            if (!state.gameActive) {
+                requestAnimationFrame(gameLoop);
+                return;
+            }
+
+            const now = Date.now();
+            
+            // Balık pozisyonlarını güncelle
+            state.fishes.forEach(fish => {
+                const rect = fish.element.getBoundingClientRect();
+                fish.x = rect.left;
+                fish.y = rect.top;
+                fish.width = rect.width;
+                fish.height = rect.height;
                 
-                // إنشاء الأسماك بشكل دوري
-                setInterval(createFish, 2000);
+                // Hedef kilitliyse topçu dönsün
+                if (state.powerUps.targetLock.active && state.powerUps.targetLock.target === fish) {
+                    const playerRect = elements.player.getBoundingClientRect();
+                    const cx = playerRect.left + playerRect.width / 2;
+                    const cy = playerRect.top + playerRect.height / 2;
+                    
+                    const tx = fish.x + fish.width/2;
+                    const ty = fish.y + fish.height/2;
+                    const dx = tx - cx;
+                    const dy = ty - cy;
+                    const angle = Math.atan2(dy, dx) * (180/Math.PI);
+                    
+                    elements.cannon.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+                }
+            });
+            
+            // Mermileri hareket ettir
+            state.projectiles = state.projectiles.filter(projectile => {
+                if (!projectile.element || !projectile.element.parentNode) return false;
                 
-                // إنشاء بعض الأسماك في البداية
-                for (let i = 0; i < 5; i++) {
-                    setTimeout(createFish, i * 500);
+                projectile.x += projectile.vx;
+                projectile.y += projectile.vy;
+                
+                projectile.element.style.left = `${projectile.x}px`;
+                projectile.element.style.top = `${projectile.y}px`;
+                
+                // Ekran dışı kontrolü
+                if (projectile.x < 0 || projectile.x > window.innerWidth || 
+                    projectile.y < 0 || projectile.y > window.innerHeight) {
+                    projectile.element.remove();
+                    return false;
                 }
                 
-                // إعداد التحكم
-                setupControls();
+                // Çarpışma kontrolü
+                for (const fish of state.fishes) {
+                    if (projectile.x >= fish.x && projectile.x <= fish.x + fish.width && 
+                        projectile.y >= fish.y && projectile.y <= fish.y + fish.height) {
+                        
+                        // Hasar ver
+                        fish.health--;
+                        createHitEffect(fish);
+                        
+                        // Balık öldüyse
+                        if (fish.health <= 0) {
+                            catchFish(fish, projectile.isBot);
+                        } else if (fish.isBoss) {
+                            // Boss hasarı
+                            state.bossHealth = fish.health;
+                            updateBossHealth();
+                        }
+                        
+                        projectile.element.remove();
+                        return false;
+                    }
+                }
                 
-                // تحديث واجهة المستخدم
+                return true;
+            });
+            
+            // Otomatik hedefleme
+            if (state.autoAim && now - state.lastAutoAimTime > 1000) {
+                const playerRect = elements.player.getBoundingClientRect();
+                const cx = playerRect.left + playerRect.width / 2;
+                const cy = playerRect.top + playerRect.height / 2;
+
+                let bestFish = null;
+                let bestScore = -Infinity;
+
+                state.fishes.forEach(f => {
+                    const dx = f.x + f.width/2 - cx;
+                    const dy = f.y + f.height/2 - cy;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    let score = (f.value * 2) - (dist / 10);
+                    
+                    if (score > bestScore && dist < 600) {
+                        bestScore = score;
+                        bestFish = f;
+                    }
+                });
+
+                if (bestFish) {
+                    const tx = bestFish.x + bestFish.width/2;
+                    const ty = bestFish.y + bestFish.height/2;
+                    const dx = tx - cx;
+                    const dy = ty - cy;
+                    const angle = Math.atan2(dy, dx);
+                    
+                    shootProjectile(angle);
+                }
+                
+                state.lastAutoAimTime = now;
+            }
+            
+            // Kombo kontrolü
+            if (state.combo > 0 && now - state.lastComboTime > config.comboDecayTime) {
+                state.combo = 0;
+                state.multiplier = 1;
+            }
+            
+            // Güçlendirme cooldown'larını güncelle
+            if (state.powerUps.targetLock.cooldown > 0) {
+                state.powerUps.targetLock.cooldown -= 16;
+                if (state.powerUps.targetLock.cooldown <= 0) {
+                    state.powerUps.targetLock.cooldown = 0;
+                }
+            }
+            
+            if (state.powerUps.tripleShot.cooldown > 0) {
+                state.powerUps.tripleShot.cooldown -= 16;
+                if (state.powerUps.tripleShot.cooldown <= 0) {
+                    state.powerUps.tripleShot.cooldown = 0;
+                }
+            }
+            
+            // UI güncelleme
+            if (now % 10 === 0) {
                 updateUI();
             }
             
-            // بدء اللعبة عند تحميل الصفحة
-            startGame();
-        });
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Event dinleyicileri
+        function setupEventListeners() {
+            // Bahis butonları
+            elements.increaseBetBtn.addEventListener("click", () => {
+                if (state.score >= state.bet + config.betStep && state.bet < config.maxBet) {
+                    state.bet += config.betStep;
+                    updateUI();
+                }
+            });
+
+            elements.decreaseBetBtn.addEventListener("click", () => {
+                if (state.bet > config.minBet) {
+                    state.bet -= config.betStep;
+                    updateUI();
+                }
+            });
+
+            // Yeniden başlat butonu
+            elements.restartBtn.addEventListener("click", restartGame);
+
+            // Fare hareketi ile topçu döndürme
+            document.addEventListener("mousemove", e => {
+                if (!state.gameActive || state.powerUps.targetLock.active || state.joystick.active) return;
+                
+                const playerRect = elements.player.getBoundingClientRect();
+                const cx = playerRect.left + playerRect.width / 2;
+                const cy = playerRect.top + playerRect.height / 2;
+                const angle = Math.atan2(e.clientY - cy, e.clientX - cx) * 180 / Math.PI;
+                elements.cannon.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+            });
+
+            // Tıklama ile ateş etme
+            document.addEventListener("click", e => {
+                if (state.gameActive && 
+                    e.target.id !== 'increase-bet' && 
+                    e.target.id !== 'decrease-bet' &&
+                    !e.target.closest('.power-up')) {
+                    shootProjectile();
+                }
+            });
+
+            // Otomatik hedefleme butonu
+            elements.autoAimBtn.addEventListener("click", toggleAutoAim);
+            
+            // Oyun başlatma butonu
+            elements.startGameBtn.addEventListener("click", startGame);
+            
+            // Güçlendirme butonları
+            elements.powerUp1.addEventListener("click", targetLock);
+            elements.powerUp2.addEventListener("click", tripleShot);
+            
+            // Pencere boyutu değiştiğinde
+            window.addEventListener("resize", updateUI);
+        }
+
+        // Oyunu başlat
+        initGame();
     </script>
 </body>
 </html>
